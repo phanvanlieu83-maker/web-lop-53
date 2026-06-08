@@ -3,88 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản trị nội dung lớp 5/3 - Admin 4.0</title>
+  <title>Quản trị nội dung lớp 5/3 - Admin 5.0</title>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .admin-wrap{max-width:1100px;margin:40px auto;background:#fff;border-radius:18px;padding:28px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
-    .admin-title{color:#005f3b;margin-top:0}.admin-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.admin-tabs button,.orange-btn{background:#f59e0b;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}.admin-tabs button.active{background:#047857}.grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}.stat-card{background:#ecfdf5;border-left:5px solid #059669;border-radius:10px;padding:14px;font-weight:700;color:#064e3b}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-row{margin:12px 0}.form-row label{display:block;font-weight:700;color:#006344;margin-bottom:6px}.form-row input,.form-row select,.form-row textarea{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:9px;padding:11px;font-size:15px}.form-row textarea{min-height:120px}.full{grid-column:1/-1}.status{margin:12px 0;font-weight:700}.list-item{background:#f0fdf4;border-left:5px solid #059669;border-radius:10px;margin:10px 0;padding:13px;display:flex;justify-content:space-between;gap:10px;align-items:center}.list-actions{display:flex;gap:6px;flex-wrap:wrap}.list-actions button{border:0;border-radius:7px;padding:8px 10px;color:#fff;cursor:pointer;font-weight:700}.edit{background:#2563eb}.trash{background:#dc2626}.restore{background:#059669}.delete{background:#7f1d1d}.view{background:#047857}.muted{color:#64748b;font-size:13px}.hidden{display:none}.preview-img{width:70px;height:50px;object-fit:cover;border-radius:6px;margin-right:8px}.admin-login{max-width:420px;margin:80px auto;background:white;border-radius:18px;padding:28px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
-    @media(max-width:700px){.form-grid{grid-template-columns:1fr}.admin-wrap{margin:10px;padding:18px}.list-item{flex-direction:column;align-items:flex-start}}
+    body{background:#f1f5f9;margin:0;font-family:Arial,sans-serif;color:#111827}.admin-wrap{max-width:1180px;margin:40px auto;background:#fff;padding:28px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+    .admin-header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.admin-header h1{color:#006b3c;margin:0}.muted{color:#6b7280}.login-box{max-width:420px;margin:70px auto;background:#fff;padding:30px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+    input,select,textarea{width:100%;box-sizing:border-box;padding:12px;border:1px solid #cbd5e1;border-radius:10px;margin:8px 0 14px;font-size:15px}textarea{min-height:110px}.btn{border:0;border-radius:10px;padding:11px 16px;font-weight:700;cursor:pointer;background:#f59e0b;color:#fff;margin:4px}.btn.green{background:#059669}.btn.red{background:#ef4444}.btn.gray{background:#64748b}.btn.blue{background:#2563eb}.btn.small{padding:7px 10px;font-size:13px}.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}.tab{background:#f59e0b;color:white;border:0;border-radius:10px;padding:11px 14px;font-weight:700;cursor:pointer}.tab.active{background:#006b3c}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:14px;margin:18px 0}.stat{background:#ecfdf5;border-left:6px solid #059669;border-radius:14px;padding:16px}.stat b{display:block;font-size:26px;color:#006b3c}.form-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:18px;margin:16px 0}.drop-zone{border:2px dashed #10b981;background:#ecfdf5;border-radius:16px;padding:24px;text-align:center;color:#065f46;font-weight:700}.drop-zone.drag{background:#d1fae5;border-color:#047857}.list-item{background:#f0fdf4;border-left:6px solid #059669;border-radius:14px;padding:14px;margin:10px 0;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.list-item.deleted{opacity:.55;background:#f8fafc;border-left-color:#94a3b8}.item-title{font-weight:800;color:#065f46}.item-meta{font-size:13px;color:#64748b;margin-top:5px}.actions{min-width:220px;text-align:right}.badge{display:inline-block;background:#fef3c7;color:#92400e;padding:4px 8px;border-radius:999px;font-size:12px;margin:3px}.preview-img{width:82px;height:60px;object-fit:cover;border-radius:8px;margin-right:8px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}@media(max-width:720px){.row{grid-template-columns:1fr}.actions{text-align:left;min-width:auto}.list-item{display:block}}
   </style>
 </head>
 <body>
-<header>
-  <h1>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h1>
-  <h2>Quản trị nội dung lớp 5/3 - Phiên bản 4.0</h2>
-</header>
-
-<div id="loginBox" class="admin-login">
-  <h2>🔐 Đăng nhập quản trị</h2>
-  <p class="muted">Chỉ giáo viên quản trị mới được đăng nội dung.</p>
-  <div class="form-row"><label>Tài khoản</label><input id="adminUser" placeholder="admin"></div>
-  <div class="form-row"><label>Mật khẩu</label><input id="adminPass" type="password" placeholder="Mật khẩu"></div>
-  <button class="orange-btn" onclick="dangNhapAdmin()">Đăng nhập</button>
-  <p id="loginStatus" class="status"></p>
-</div>
-
-<main id="adminMain" class="admin-wrap hidden">
-  <h2 class="admin-title">🛠️ Bảng quản trị nội dung 4.0</h2>
-  <button class="orange-btn" onclick="dangXuatAdmin()">🚪 Đăng xuất</button>
-
-  <div id="dashboard" class="grid-stats"></div>
-
-  <div class="admin-tabs">
-    <button onclick="chonLoai('thong_bao')" id="tab_thong_bao">📢 Thông báo</button>
-    <button onclick="chonLoai('lich_hoc')" id="tab_lich_hoc">📅 Lịch học</button>
-    <button onclick="chonLoai('tai_lieu')" id="tab_tai_lieu">📚 Tài liệu</button>
-    <button onclick="chonLoai('thu_vien_anh')" id="tab_thu_vien_anh">🖼️ Thư viện ảnh</button>
-    <button onclick="chonLoai('video_lop')" id="tab_video_lop">🎬 Video</button>
-    <button onclick="chonLoai('nam_hoc')" id="tab_nam_hoc">🏫 Năm học</button>
-    <button onclick="xemThungRac()" id="tab_trash">🗑️ Thùng rác</button>
+  <div id="loginBox" class="login-box">
+    <h2>🔐 Đăng nhập quản trị</h2>
+    <p class="muted">Chỉ giáo viên quản trị mới được đăng nội dung.</p>
+    <input id="adminUser" placeholder="Tài khoản" />
+    <input id="adminPass" type="password" placeholder="Mật khẩu" />
+    <button class="btn green" onclick="dangNhapAdmin()">Đăng nhập</button>
+    <p id="loginMsg"></p>
   </div>
 
-  <hr>
-  <h3 id="formTitle">Đăng nội dung</h3>
-  <input type="hidden" id="editingId">
+  <div id="adminApp" class="admin-wrap" style="display:none">
+    <div class="admin-header">
+      <div>
+        <h1>🛠️ Admin 5.0 - Cổng thông tin lớp 5/3</h1>
+        <p class="muted">Dashboard, sửa/xóa, thùng rác, album ảnh, kéo thả upload và tin nổi bật.</p>
+      </div>
+      <button class="btn gray" onclick="dangXuatAdmin()">Đăng xuất</button>
+    </div>
 
-  <div class="form-grid">
-    <div class="form-row"><label>🏷️ Tiêu đề</label><input id="tieuDe" placeholder="Nhập tiêu đề hiển thị"></div>
-    <div class="form-row"><label>📚 Năm học</label><select id="namHoc">
-      <option value="2025-2026">2025-2026 | Lớp 5/3</option>
-      <option value="2024-2025">2024-2025 | Lớp 3/1</option>
-      <option value="2023-2024">2023-2024 | Lớp 5/2</option>
-      <option value="2022-2023">2022-2023 | Lớp 5/2</option>
-      <option value="2021-2022">2021-2022 | Lớp 5/1</option>
-    </select></div>
+    <div id="dashboard" class="grid"></div>
 
-    <div class="form-row full" id="noiDungWrap"><label>📝 Nội dung / Ghi chú</label><textarea id="noiDung" placeholder="Nhập nội dung thông báo, lịch học hoặc ghi chú"></textarea></div>
-    <div class="form-row" id="ngayWrap"><label>📅 Ngày</label><input id="ngay" type="date"></div>
-    <div class="form-row" id="albumWrap"><label>📁 Album ảnh</label><input id="album" placeholder="Ví dụ: Khai giảng, 20-11, Tổng kết"></div>
-    <div class="form-row" id="lopWrap"><label>🏫 Lớp</label><input id="lop" placeholder="Ví dụ: 5/3"></div>
-    <div class="form-row" id="trangThaiWrap"><label>📌 Trạng thái</label><input id="trangThai" placeholder="Năm học hiện tại / Đã lưu trữ"></div>
+    <div class="tabs">
+      <button class="tab active" onclick="chonLoai('thong_bao', this)">📢 Thông báo</button>
+      <button class="tab" onclick="chonLoai('lich_hoc', this)">📅 Lịch học</button>
+      <button class="tab" onclick="chonLoai('tai_lieu', this)">📚 Tài liệu</button>
+      <button class="tab" onclick="chonLoai('thu_vien_anh', this)">🖼️ Thư viện ảnh</button>
+      <button class="tab" onclick="chonLoai('video_lop', this)">🎬 Video</button>
+      <button class="tab" onclick="chonLoai('nam_hoc', this)">🏫 Năm học</button>
+      <button class="tab" onclick="chonLoai('trash', this)">🗑️ Thùng rác</button>
+    </div>
 
-    <div class="form-row full" id="fileWrap"><label>📎 File/Ảnh đính kèm</label><input id="fileUpload" type="file" multiple><p class="muted">Có thể chọn nhiều ảnh cùng lúc cho Thư viện ảnh.</p></div>
-    <div class="form-row full" id="videoWrap"><label>🎬 Link video YouTube hoặc video online</label><input id="videoUrl" placeholder="Dán link video tại đây"></div>
+    <div class="form-card" id="formCard">
+      <h2 id="formTitle">📢 Đăng thông báo</h2>
+      <input type="hidden" id="editId" />
+      <div class="row">
+        <div><label>Tiêu đề</label><input id="tieuDe" placeholder="Nhập tiêu đề hiển thị" /></div>
+        <div><label>Năm học</label><select id="namHoc"><option value="2025-2026">2025-2026 | Lớp 5/3</option><option value="2024-2025">2024-2025 | Lớp 3/1</option><option value="2023-2024">2023-2024 | Lớp 5/2</option><option value="2022-2023">2022-2023 | Lớp 5/2</option><option value="2021-2022">2021-2022 | Lớp 5/1</option></select></div>
+      </div>
+      <div id="noiDungWrap"><label>Nội dung</label><textarea id="noiDung" placeholder="Nhập nội dung thông báo, lịch học hoặc ghi chú"></textarea></div>
+      <div id="ngayWrap" style="display:none"><label>Ngày</label><input type="date" id="ngayHoc" /></div>
+      <div id="videoWrap" style="display:none"><label>Link video YouTube/online</label><input id="videoUrl" placeholder="Dán link video" /></div>
+      <div id="namHocWrap" style="display:none" class="row"><div><label>Lớp</label><input id="lop" placeholder="Ví dụ: 5/3" /></div><div><label>Trạng thái</label><input id="trangThai" placeholder="Năm học hiện tại / Đã lưu trữ" /></div></div>
+      <div id="albumWrap" style="display:none"><label>Tên album/sự kiện ảnh</label><input id="album" placeholder="Ví dụ: Khai giảng, Trung thu, 20/11" /></div>
+      <label><input type="checkbox" id="noiBat" style="width:auto;margin-right:6px" />📌 Ghim làm tin nổi bật</label>
+      <div id="fileWrap"><label>File/Ảnh đính kèm</label><div id="dropZone" class="drop-zone">Kéo thả file/ảnh vào đây hoặc bấm chọn file<br><small>Có thể chọn nhiều ảnh cùng lúc</small><input id="fileUpload" type="file" multiple style="display:block;margin:12px auto 0;max-width:430px" /></div></div>
+      <button class="btn green" onclick="luuNoiDungV5()">💾 Lưu nội dung</button>
+      <button class="btn blue" onclick="lamMoiForm()">🔄 Làm mới</button>
+      <p id="adminStatus"></p>
+    </div>
+
+    <h2 id="listTitle">📂 Danh sách nội dung</h2>
+    <div id="adminList"></div>
   </div>
 
-  <button class="orange-btn" onclick="luuNoiDung()">💾 Lưu nội dung</button>
-  <button class="orange-btn" onclick="lamMoiForm()">🔄 Làm mới</button>
-  <p id="adminStatus" class="status"></p>
-
-  <hr>
-  <h2>📂 Danh sách nội dung</h2>
-  <div class="form-row"><label>🔎 Lọc theo loại</label><select id="locLoai" onchange="taiDanhSachAdmin()">
-    <option value="thong_bao">Thông báo</option>
-    <option value="lich_hoc">Lịch học</option>
-    <option value="tai_lieu">Tài liệu</option>
-    <option value="thu_vien_anh">Thư viện ảnh</option>
-    <option value="video_lop">Video</option>
-    <option value="nam_hoc">Năm học</option>
-  </select></div>
-  <div id="adminList"></div>
-</main>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase-config.js"></script>
-<script src="admin.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="admin.js"></script>
 </body>
 </html>
