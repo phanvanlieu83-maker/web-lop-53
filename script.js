@@ -760,17 +760,39 @@ async function taiVideoV3() {
     return;
   }
 
-  let html = '<div class="tai-lieu-list">';
-  data.forEach(video => {
-    html += `
-      <div class="tai-lieu-item">
-        <span>🎬 ${video.tieude || "Video hoạt động"}</span>
-        <a href="${video.videourl}" target="_blank">Xem video</a>
+  let html = '<div class="video-list">';
+
+data.forEach(video => {
+  let url = video.videourl || "";
+  let embedUrl = url;
+
+  if (url.includes("youtube.com/watch?v=")) {
+    const id = url.split("v=")[1].split("&")[0];
+    embedUrl = "https://www.youtube.com/embed/" + id;
+  }
+
+  if (url.includes("youtu.be/")) {
+    const id = url.split("youtu.be/")[1].split("?")[0];
+    embedUrl = "https://www.youtube.com/embed/" + id;
+  }
+
+  html += `
+    <div class="video-card">
+      <h3>🎬 ${video.tieude || "Video hoạt động"}</h3>
+      <div class="video-box">
+        <iframe 
+          src="${embedUrl}" 
+          frameborder="0" 
+          allowfullscreen>
+        </iframe>
       </div>
-    `;
-  });
-  html += "</div>";
-  khuVuc.innerHTML = html;
+      <p><a href="${url}" target="_blank">Mở video trong tab mới</a></p>
+    </div>
+  `;
+});
+
+html += "</div>";
+khuVuc.innerHTML = html;
 }
 
 async function taiNamHocV3() {
