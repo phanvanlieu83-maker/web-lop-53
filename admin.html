@@ -3,20 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản trị nội dung lớp 5/3</title>
+  <title>Quản trị nội dung lớp 5/3 - Phiên bản 3.0</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
   <h1>QUẢN TRỊ NỘI DUNG LỚP 5/3</h1>
   <h2>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h2>
-  <p>Đăng thông báo, lịch học, tài liệu, thư viện ảnh và ảnh các năm học cũ</p>
+  <p>Phiên bản 3.0 - Quản lý thông báo, lịch học, tài liệu, ảnh và video</p>
 </header>
 
 <main>
   <section class="box" id="adminLoginBox">
     <h2>🔐 Đăng nhập quản trị</h2>
-    <p>Nhập mật khẩu quản trị để đăng nội dung lên web.</p>
+    <p>Nhập mật khẩu quản trị để đăng nội dung lên website lớp.</p>
     <input type="password" id="adminPassword" class="input-box" placeholder="Nhập mật khẩu admin">
     <br><br>
     <button onclick="dangNhapAdmin()">Đăng nhập</button>
@@ -24,64 +24,84 @@
   </section>
 
   <section class="box" id="adminPanel" style="display:none;">
-    <h2>📤 Đăng nội dung lên web</h2>
-    <p>Chọn đúng mục để nội dung xuất hiện đúng tab trên website lớp.</p>
+    <h2>🛠️ Bảng quản trị nội dung 3.0</h2>
+    <p>Chọn loại nội dung cần đăng, nhập thông tin rồi bấm lưu.</p>
 
-    <div class="form-group">
-      <label>📝 Tiêu đề hiển thị</label>
-      <input type="text" id="tieuDeNoiDung" class="input-box" placeholder="Ví dụ: Thông báo họp phụ huynh tháng 9">
+    <div class="admin-tabs">
+      <button onclick="chonModule('thong_bao')">📢 Thông báo</button>
+      <button onclick="chonModule('lich_hoc')">📅 Lịch học</button>
+      <button onclick="chonModule('tai_lieu')">📚 Tài liệu</button>
+      <button onclick="chonModule('thu_vien_anh')">🖼️ Thư viện ảnh</button>
+      <button onclick="chonModule('video_lop')">🎬 Video</button>
+      <button onclick="chonModule('nam_hoc')">🏫 Năm học</button>
     </div>
-
-    <div class="form-group">
-      <label>📌 Chọn mục hiển thị</label>
-      <select id="loaiNoiDung" class="input-box" onchange="doiLoaiNoiDungAdmin()">
-        <option value="thongbao">📢 Thông báo mới</option>
-        <option value="lichhoc">📅 Lịch học - Lịch kiểm tra</option>
-        <option value="tailieu">📚 Kho tài liệu lớp 5/3</option>
-        <option value="thuvienanh">🖼️ Thư viện ảnh năm học hiện tại</option>
-        <option value="namhoc">🗂️ Hình ảnh các năm học trước</option>
-      </select>
-    </div>
-
-    <div class="form-group" id="chonNamHocBox" style="display:none;">
-      <label>📚 Chọn năm học lưu trữ</label>
-      <select id="namHocLuuTru" class="input-box">
-        <option value="2025-2026">Năm học 2025 - 2026 | Lớp 5/3</option>
-        <option value="2024-2025">Năm học 2024 - 2025 | Lớp 3/1</option>
-        <option value="2023-2024">Năm học 2023 - 2024 | Lớp 5/2</option>
-        <option value="2022-2023">Năm học 2022 - 2023 | Lớp 5/2</option>
-        <option value="2021-2022">Năm học 2021 - 2022 | Lớp 5/1</option>
-      </select>
-      <p style="color:#666;margin-top:6px;">Mục này dùng để đưa ảnh hoạt động của các năm học cũ vào phần “Lưu trữ các năm học”.</p>
-    </div>
-
-    <div class="form-group">
-      <label>📎 Chọn file</label>
-      <input type="file" id="fileTaiLieu" class="input-box" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp">
-    </div>
-
-    <button onclick="uploadNoiDung()">Tải file lên</button>
-    <p id="uploadStatus"></p>
 
     <hr>
-    <h2>📂 Danh sách nội dung đã đăng</h2>
+
+    <div id="moduleTitle" class="module-title">📢 Đăng thông báo</div>
+
     <div class="form-group">
-      <label>🔎 Lọc theo mục</label>
-      <select id="boLocDanhSach" class="input-box" onchange="taiDanhSachNoiDungAdmin()">
-        <option value="tatca">Tất cả các mục</option>
-        <option value="thongbao">Thông báo mới</option>
-        <option value="lichhoc">Lịch học - Lịch kiểm tra</option>
-        <option value="tailieu">Kho tài liệu lớp 5/3</option>
-        <option value="thuvienanh">Thư viện ảnh năm học hiện tại</option>
-        <option value="namhoc">Hình ảnh các năm học trước</option>
+      <label>🏷️ Tiêu đề</label>
+      <input type="text" id="tieuDe" class="input-box" placeholder="Ví dụ: Thông báo họp phụ huynh">
+    </div>
+
+    <div class="form-group" id="noiDungBox">
+      <label>📝 Nội dung</label>
+      <textarea id="noiDung" class="input-box" rows="5" placeholder="Nhập nội dung chi tiết..."></textarea>
+    </div>
+
+    <div class="form-group" id="ngayBox" style="display:none;">
+      <label>📅 Ngày</label>
+      <input type="date" id="ngayHoc" class="input-box">
+    </div>
+
+    <div class="form-group">
+      <label>📚 Năm học</label>
+      <select id="namHoc" class="input-box">
+        <option value="2025-2026">2025 - 2026 | Lớp 5/3</option>
+        <option value="2024-2025">2024 - 2025 | Lớp 3/1</option>
+        <option value="2023-2024">2023 - 2024 | Lớp 5/2</option>
+        <option value="2022-2023">2022 - 2023 | Lớp 5/2</option>
+        <option value="2021-2022">2021 - 2022 | Lớp 5/1</option>
       </select>
     </div>
-    <div id="adminDanhSachTaiLieu">Đang tải danh sách...</div>
+
+    <div class="form-group" id="fileBox">
+      <label>📎 File/Ảnh đính kèm</label>
+      <input type="file" id="fileUpload" class="input-box" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4">
+      <p class="small-note">Có thể bỏ trống nếu chỉ đăng thông báo hoặc lịch học dạng chữ.</p>
+    </div>
+
+    <div class="form-group" id="videoUrlBox" style="display:none;">
+      <label>🎬 Link video Youtube hoặc video online</label>
+      <input type="text" id="videoUrl" class="input-box" placeholder="Dán link Youtube hoặc video tại đây">
+    </div>
+
+    <button onclick="luuNoiDung()">💾 Lưu nội dung</button>
+    <button onclick="lamMoiForm()" type="button">🔄 Làm mới</button>
+    <p id="adminStatus"></p>
+
+    <hr>
+
+    <h2>📂 Danh sách nội dung đã đăng</h2>
+    <div class="form-group">
+      <label>🔎 Lọc theo loại</label>
+      <select id="boLocModule" class="input-box" onchange="taiDanhSachAdmin()">
+        <option value="thong_bao">📢 Thông báo</option>
+        <option value="lich_hoc">📅 Lịch học</option>
+        <option value="tai_lieu">📚 Tài liệu</option>
+        <option value="thu_vien_anh">🖼️ Thư viện ảnh</option>
+        <option value="video_lop">🎬 Video</option>
+        <option value="nam_hoc">🏫 Năm học</option>
+      </select>
+    </div>
+
+    <div id="adminDanhSach">Đang tải...</div>
   </section>
 </main>
 
 <footer>
-  © 2026 - Quản trị web lớp cô Trà My
+  © 2026 - Quản trị website lớp cô Trà My - Phiên bản 3.0
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
