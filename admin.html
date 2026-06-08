@@ -1,108 +1,87 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quản trị nội dung lớp 5/3 - Phiên bản 3.0</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Quản trị nội dung lớp 5/3 - Admin 4.0</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .admin-wrap{max-width:1100px;margin:40px auto;background:#fff;border-radius:18px;padding:28px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
+    .admin-title{color:#005f3b;margin-top:0}.admin-tabs{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.admin-tabs button,.orange-btn{background:#f59e0b;color:#fff;border:0;border-radius:8px;padding:10px 14px;font-weight:700;cursor:pointer}.admin-tabs button.active{background:#047857}.grid-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:16px 0}.stat-card{background:#ecfdf5;border-left:5px solid #059669;border-radius:10px;padding:14px;font-weight:700;color:#064e3b}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.form-row{margin:12px 0}.form-row label{display:block;font-weight:700;color:#006344;margin-bottom:6px}.form-row input,.form-row select,.form-row textarea{width:100%;box-sizing:border-box;border:1px solid #cbd5e1;border-radius:9px;padding:11px;font-size:15px}.form-row textarea{min-height:120px}.full{grid-column:1/-1}.status{margin:12px 0;font-weight:700}.list-item{background:#f0fdf4;border-left:5px solid #059669;border-radius:10px;margin:10px 0;padding:13px;display:flex;justify-content:space-between;gap:10px;align-items:center}.list-actions{display:flex;gap:6px;flex-wrap:wrap}.list-actions button{border:0;border-radius:7px;padding:8px 10px;color:#fff;cursor:pointer;font-weight:700}.edit{background:#2563eb}.trash{background:#dc2626}.restore{background:#059669}.delete{background:#7f1d1d}.view{background:#047857}.muted{color:#64748b;font-size:13px}.hidden{display:none}.preview-img{width:70px;height:50px;object-fit:cover;border-radius:6px;margin-right:8px}.admin-login{max-width:420px;margin:80px auto;background:white;border-radius:18px;padding:28px;box-shadow:0 8px 28px rgba(0,0,0,.08)}
+    @media(max-width:700px){.form-grid{grid-template-columns:1fr}.admin-wrap{margin:10px;padding:18px}.list-item{flex-direction:column;align-items:flex-start}}
+  </style>
 </head>
 <body>
 <header>
-  <h1>QUẢN TRỊ NỘI DUNG LỚP 5/3</h1>
-  <h2>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h2>
-  <p>Phiên bản 3.0 - Quản lý thông báo, lịch học, tài liệu, ảnh và video</p>
+  <h1>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h1>
+  <h2>Quản trị nội dung lớp 5/3 - Phiên bản 4.0</h2>
 </header>
 
-<main>
-  <section class="box" id="adminLoginBox">
-    <h2>🔐 Đăng nhập quản trị</h2>
-    <p>Nhập mật khẩu quản trị để đăng nội dung lên website lớp.</p>
-    <input type="password" id="adminPassword" class="input-box" placeholder="Nhập mật khẩu admin">
-    <br><br>
-    <button onclick="dangNhapAdmin()">Đăng nhập</button>
-    <p id="adminLoginMsg"></p>
-  </section>
+<div id="loginBox" class="admin-login">
+  <h2>🔐 Đăng nhập quản trị</h2>
+  <p class="muted">Chỉ giáo viên quản trị mới được đăng nội dung.</p>
+  <div class="form-row"><label>Tài khoản</label><input id="adminUser" placeholder="admin"></div>
+  <div class="form-row"><label>Mật khẩu</label><input id="adminPass" type="password" placeholder="Mật khẩu"></div>
+  <button class="orange-btn" onclick="dangNhapAdmin()">Đăng nhập</button>
+  <p id="loginStatus" class="status"></p>
+</div>
 
-  <section class="box" id="adminPanel" style="display:none;">
-    <h2>🛠️ Bảng quản trị nội dung 3.0</h2>
-    <p>Chọn loại nội dung cần đăng, nhập thông tin rồi bấm lưu.</p>
+<main id="adminMain" class="admin-wrap hidden">
+  <h2 class="admin-title">🛠️ Bảng quản trị nội dung 4.0</h2>
+  <button class="orange-btn" onclick="dangXuatAdmin()">🚪 Đăng xuất</button>
 
-    <div class="admin-tabs">
-      <button onclick="chonModule('thong_bao')">📢 Thông báo</button>
-      <button onclick="chonModule('lich_hoc')">📅 Lịch học</button>
-      <button onclick="chonModule('tai_lieu')">📚 Tài liệu</button>
-      <button onclick="chonModule('thu_vien_anh')">🖼️ Thư viện ảnh</button>
-      <button onclick="chonModule('video_lop')">🎬 Video</button>
-      <button onclick="chonModule('nam_hoc')">🏫 Năm học</button>
-    </div>
+  <div id="dashboard" class="grid-stats"></div>
 
-    <hr>
+  <div class="admin-tabs">
+    <button onclick="chonLoai('thong_bao')" id="tab_thong_bao">📢 Thông báo</button>
+    <button onclick="chonLoai('lich_hoc')" id="tab_lich_hoc">📅 Lịch học</button>
+    <button onclick="chonLoai('tai_lieu')" id="tab_tai_lieu">📚 Tài liệu</button>
+    <button onclick="chonLoai('thu_vien_anh')" id="tab_thu_vien_anh">🖼️ Thư viện ảnh</button>
+    <button onclick="chonLoai('video_lop')" id="tab_video_lop">🎬 Video</button>
+    <button onclick="chonLoai('nam_hoc')" id="tab_nam_hoc">🏫 Năm học</button>
+    <button onclick="xemThungRac()" id="tab_trash">🗑️ Thùng rác</button>
+  </div>
 
-    <div id="moduleTitle" class="module-title">📢 Đăng thông báo</div>
+  <hr>
+  <h3 id="formTitle">Đăng nội dung</h3>
+  <input type="hidden" id="editingId">
 
-    <div class="form-group">
-      <label>🏷️ Tiêu đề</label>
-      <input type="text" id="tieuDe" class="input-box" placeholder="Ví dụ: Thông báo họp phụ huynh">
-    </div>
+  <div class="form-grid">
+    <div class="form-row"><label>🏷️ Tiêu đề</label><input id="tieuDe" placeholder="Nhập tiêu đề hiển thị"></div>
+    <div class="form-row"><label>📚 Năm học</label><select id="namHoc">
+      <option value="2025-2026">2025-2026 | Lớp 5/3</option>
+      <option value="2024-2025">2024-2025 | Lớp 3/1</option>
+      <option value="2023-2024">2023-2024 | Lớp 5/2</option>
+      <option value="2022-2023">2022-2023 | Lớp 5/2</option>
+      <option value="2021-2022">2021-2022 | Lớp 5/1</option>
+    </select></div>
 
-    <div class="form-group" id="noiDungBox">
-      <label>📝 Nội dung</label>
-      <textarea id="noiDung" class="input-box" rows="5" placeholder="Nhập nội dung chi tiết..."></textarea>
-    </div>
+    <div class="form-row full" id="noiDungWrap"><label>📝 Nội dung / Ghi chú</label><textarea id="noiDung" placeholder="Nhập nội dung thông báo, lịch học hoặc ghi chú"></textarea></div>
+    <div class="form-row" id="ngayWrap"><label>📅 Ngày</label><input id="ngay" type="date"></div>
+    <div class="form-row" id="albumWrap"><label>📁 Album ảnh</label><input id="album" placeholder="Ví dụ: Khai giảng, 20-11, Tổng kết"></div>
+    <div class="form-row" id="lopWrap"><label>🏫 Lớp</label><input id="lop" placeholder="Ví dụ: 5/3"></div>
+    <div class="form-row" id="trangThaiWrap"><label>📌 Trạng thái</label><input id="trangThai" placeholder="Năm học hiện tại / Đã lưu trữ"></div>
 
-    <div class="form-group" id="ngayBox" style="display:none;">
-      <label>📅 Ngày</label>
-      <input type="date" id="ngayHoc" class="input-box">
-    </div>
+    <div class="form-row full" id="fileWrap"><label>📎 File/Ảnh đính kèm</label><input id="fileUpload" type="file" multiple><p class="muted">Có thể chọn nhiều ảnh cùng lúc cho Thư viện ảnh.</p></div>
+    <div class="form-row full" id="videoWrap"><label>🎬 Link video YouTube hoặc video online</label><input id="videoUrl" placeholder="Dán link video tại đây"></div>
+  </div>
 
-    <div class="form-group">
-      <label>📚 Năm học</label>
-      <select id="namHoc" class="input-box">
-        <option value="2025-2026">2025 - 2026 | Lớp 5/3</option>
-        <option value="2024-2025">2024 - 2025 | Lớp 3/1</option>
-        <option value="2023-2024">2023 - 2024 | Lớp 5/2</option>
-        <option value="2022-2023">2022 - 2023 | Lớp 5/2</option>
-        <option value="2021-2022">2021 - 2022 | Lớp 5/1</option>
-      </select>
-    </div>
+  <button class="orange-btn" onclick="luuNoiDung()">💾 Lưu nội dung</button>
+  <button class="orange-btn" onclick="lamMoiForm()">🔄 Làm mới</button>
+  <p id="adminStatus" class="status"></p>
 
-    <div class="form-group" id="fileBox">
-      <label>📎 File/Ảnh đính kèm</label>
-      <input type="file" id="uploadFile" multiple> class="input-box" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.mp4">
-      <p class="small-note">Có thể bỏ trống nếu chỉ đăng thông báo hoặc lịch học dạng chữ.</p>
-    </div>
-
-    <div class="form-group" id="videoUrlBox" style="display:none;">
-      <label>🎬 Link video Youtube hoặc video online</label>
-      <input type="text" id="videoUrl" class="input-box" placeholder="Dán link Youtube hoặc video tại đây">
-    </div>
-
-    <button onclick="luuNoiDung()">💾 Lưu nội dung</button>
-    <button onclick="lamMoiForm()" type="button">🔄 Làm mới</button>
-    <p id="adminStatus"></p>
-
-    <hr>
-
-    <h2>📂 Danh sách nội dung đã đăng</h2>
-    <div class="form-group">
-      <label>🔎 Lọc theo loại</label>
-      <select id="boLocModule" class="input-box" onchange="taiDanhSachAdmin()">
-        <option value="thong_bao">📢 Thông báo</option>
-        <option value="lich_hoc">📅 Lịch học</option>
-        <option value="tai_lieu">📚 Tài liệu</option>
-        <option value="thu_vien_anh">🖼️ Thư viện ảnh</option>
-        <option value="video_lop">🎬 Video</option>
-        <option value="nam_hoc">🏫 Năm học</option>
-      </select>
-    </div>
-
-    <div id="adminDanhSach">Đang tải...</div>
-  </section>
+  <hr>
+  <h2>📂 Danh sách nội dung</h2>
+  <div class="form-row"><label>🔎 Lọc theo loại</label><select id="locLoai" onchange="taiDanhSachAdmin()">
+    <option value="thong_bao">Thông báo</option>
+    <option value="lich_hoc">Lịch học</option>
+    <option value="tai_lieu">Tài liệu</option>
+    <option value="thu_vien_anh">Thư viện ảnh</option>
+    <option value="video_lop">Video</option>
+    <option value="nam_hoc">Năm học</option>
+  </select></div>
+  <div id="adminList"></div>
 </main>
-
-<footer>
-  © 2026 - Quản trị website lớp cô Trà My - Phiên bản 3.0
-</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
