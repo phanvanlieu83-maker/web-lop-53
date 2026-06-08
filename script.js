@@ -592,49 +592,194 @@ function hienThiNamHoc() {
 
 hienThiNamHoc();
 
+
 // ===============================
-// KHO TÀI LIỆU SUPABASE
+// NỘI DUNG SUPABASE THEO TỪNG TAB
 // ===============================
+const DANH_MUC_NOI_DUNG_WEB = {
+  thongbao: {
+    ten: "Thông báo mới",
+    icon: "📢",
+    thuMuc: "thongbao",
+    sectionId: "thongbao",
+    containerId: "danhSachThongBao",
+    empty: "Chưa có thông báo mới."
+  },
+  lichhoc: {
+    ten: "Lịch học - Lịch kiểm tra",
+    icon: "📅",
+    thuMuc: "lichhoc",
+    sectionId: "lichhoc",
+    containerId: "danhSachLichHoc",
+    empty: "Chưa có lịch học hoặc lịch kiểm tra mới."
+  },
+  tailieu: {
+    ten: "Kho tài liệu lớp 5/3",
+    icon: "📚",
+    thuMuc: "tailieu",
+    sectionId: "tailieu",
+    containerId: "danhSachTaiLieu",
+    empty: "Chưa có tài liệu nào."
+  },
+  thuvienanh: {
+    ten: "Thư viện ảnh hoạt động lớp",
+    icon: "🖼️",
+    thuMuc: "thuvienanh",
+    sectionId: "thuvien",
+    containerId: "danhSachThuVienAnh",
+    empty: "Chưa có hình ảnh hoạt động nào."
+  }
+};
+
 function layIconTaiLieu(tenFile) {
   const lower = tenFile.toLowerCase();
   if (lower.endsWith(".pdf")) return "📕";
   if (lower.endsWith(".doc") || lower.endsWith(".docx")) return "📘";
   if (lower.endsWith(".xls") || lower.endsWith(".xlsx")) return "📗";
   if (lower.endsWith(".ppt") || lower.endsWith(".pptx")) return "📙";
-  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png")) return "🖼️";
+  if (lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp")) return "🖼️";
   return "📄";
 }
 
-async function taiDanhSachTaiLieu() {
-  const khuVuc = document.getElementById("danhSachTaiLieu");
+function layTenHienThiTuFile(tenFile) {
+  const chiTen = tenFile.split("/").pop();
+  const boThoiGian = chiTen.replace(/^\d+_/, "");
+  const phanTieuDe = boThoiGian.split("__")[0] || boThoiGian;
+  return phanTieuDe.replace(/-/g, " ");
+}
+
+function laFileAnh(tenFile) {
+  const lower = tenFile.toLowerCase();
+  return lower.endsWith(".jpg") || lower.endsWith(".jpeg") || lower.endsWith(".png") || lower.endsWith(".webp");
+}
+
+function damBaoKhuVucHienThi(loai) {
+  const cauHinh = DANH_MUC_NOI_DUNG_WEB[loai];
+  if (!cauHinh) return null;
+
+  let container = document.getElementById(cauHinh.containerId);
+  if (container) return container;
+
+  let section = document.getElementById(cauHinh.sectionId);
+
+  // Nếu chưa có tab Tài liệu trong index.html thì tự tạo sau mục Lịch học.
+  if (!section && loai === "tailieu") {
+    section = document.createElement("section");
+    section.id = "tailieu";
+    section.className = "box";
+    section.innerHTML = `
+      <h2>📚 Kho tài liệu lớp 5/3</h2>
+      <p>Phụ huynh và học sinh xem, tải các tài liệu của lớp tại đây.</p>
+      <div id="danhSachTaiLieu"><p>Đang tải tài liệu...</p></div>
+    `;
+
+    const lichHoc = document.getElementById("lichhoc");
+    if (lichHoc && lichHoc.parentNode) {
+      lichHoc.parentNode.insertBefore(section, lichHoc.nextSibling);
+    } else {
+      document.querySelector("main")?.appendChild(section);
+    }
+
+    // Nếu menu chưa có Tài liệu thì tự thêm.
+    const nav = document.querySelector("nav");
+    if (nav && !nav.querySelector('a[href="#tailieu"]')) {
+      const link = document.createElement("a");
+      link.href = "#tailieu";
+      link.textContent = "Tài liệu";
+      nav.insertBefore(link, nav.querySelector('a[href="#thuvien"]'));
+    }
+  }
+
+  section = document.getElementById(cauHinh.sectionId);
+  if (!section) return null;
+
+  container = document.createElement("div");
+  container.id = cauHinh.containerId;
+
+  if (loai === "lichhoc") {
+    const p = section.querySelector("p");
+    if (p) p.insertAdjacentElement("afterend", container);
+    else section.appendChild(container);
+  } else if (loai === "thuvienanh") {
+    const p = section.querySelector("p");
+    if (p) p.insertAdjacentElement("afterend", container);
+    else section.appendChild(container);
+  } else {
+    section.appendChild(container);
+  }
+
+  return container;
+}
+
+async function taiNoiDungTheoMuc(loai) {
+  const cauHinh = DANH_MUC_NOI_DUNG_WEB[loai];
+  if (!cauHinh) return;
+
+  const khuVuc = damBaoKhuVucHienThi(loai);
   if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  khuVuc.innerHTML = "<p>Đang tải...</p>";
 
   const { data, error } = await supabaseClient.storage
     .from(SUPABASE_BUCKET)
-    .list("", { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+    .list(cauHinh.thuMuc, {
+      limit: 100,
+      sortBy: { column: "created_at", order: "desc" }
+    });
 
   if (error) {
-    khuVuc.innerHTML = "<p style='color:red;'>Chưa tải được danh sách tài liệu.</p>";
+    khuVuc.innerHTML = "<p style='color:red;'>Chưa tải được nội dung.</p>";
     return;
   }
 
-  if (!data || data.length === 0) {
-    khuVuc.innerHTML = "<p>Chưa có tài liệu nào.</p>";
+  const danhSach = (data || []).filter(file => file.name && file.name !== ".emptyFolderPlaceholder");
+
+  if (danhSach.length === 0) {
+    khuVuc.innerHTML = `<p>${cauHinh.empty}</p>`;
+    return;
+  }
+
+  if (loai === "thuvienanh") {
+    let html = '<div class="tai-lieu-list">';
+    danhSach.forEach(function(file) {
+      const duongDan = `${cauHinh.thuMuc}/${file.name}`;
+      const publicUrl = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(duongDan).data.publicUrl;
+      const tenHienThi = layTenHienThiTuFile(file.name);
+
+      if (laFileAnh(file.name)) {
+        html += `
+          <div class="tai-lieu-item">
+            <span>🖼️ ${tenHienThi}</span>
+            <a href="${publicUrl}" target="_blank">Xem ảnh</a>
+          </div>
+          <div style="margin:10px 0 18px 0;">
+            <img src="${publicUrl}" alt="${tenHienThi}" style="max-width:100%;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,0.12);">
+          </div>
+        `;
+      } else {
+        html += `
+          <div class="tai-lieu-item">
+            <span>${layIconTaiLieu(file.name)} ${tenHienThi}</span>
+            <a href="${publicUrl}" target="_blank">Xem / Tải</a>
+          </div>
+        `;
+      }
+    });
+    html += "</div>";
+    khuVuc.innerHTML = html;
     return;
   }
 
   let html = '<div class="tai-lieu-list">';
 
-  data.forEach(function(file) {
-    const publicUrl = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(file.name).data.publicUrl;
-console.log("Bucket:", SUPABASE_BUCKET);
-console.log("File:", file.name);
-console.log("URL:", publicUrl);
-    const tenHienThi = file.name.replace(/^\d+_/, "");
+  danhSach.forEach(function(file) {
+    const duongDan = `${cauHinh.thuMuc}/${file.name}`;
+    const publicUrl = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(duongDan).data.publicUrl;
+    const tenHienThi = layTenHienThiTuFile(file.name);
 
     html += `
       <div class="tai-lieu-item">
-        <span>${layIconTaiLieu(file.name)} ${tenHienThi}</span>
+        <span>${cauHinh.icon} ${layIconTaiLieu(file.name)} ${tenHienThi}</span>
         <a href="${publicUrl}" target="_blank">Xem / Tải</a>
       </div>
     `;
@@ -644,4 +789,17 @@ console.log("URL:", publicUrl);
   khuVuc.innerHTML = html;
 }
 
-taiDanhSachTaiLieu();
+async function taiTatCaNoiDungSupabase() {
+  if (typeof supabaseClient === "undefined") return;
+  await taiNoiDungTheoMuc("thongbao");
+  await taiNoiDungTheoMuc("lichhoc");
+  await taiNoiDungTheoMuc("tailieu");
+  await taiNoiDungTheoMuc("thuvienanh");
+}
+
+// Giữ tên hàm cũ để tương thích.
+function taiDanhSachTaiLieu() {
+  return taiNoiDungTheoMuc("tailieu");
+}
+
+window.addEventListener("DOMContentLoaded", taiTatCaNoiDungSupabase);

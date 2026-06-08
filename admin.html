@@ -2,20 +2,21 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
-  <title>Quản trị tài liệu lớp 5/3</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản trị nội dung lớp 5/3</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <header>
-  <h1>QUẢN TRỊ TÀI LIỆU LỚP 5/3</h1>
+  <h1>QUẢN TRỊ NỘI DUNG LỚP 5/3</h1>
   <h2>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h2>
-  <p>Upload PDF, Word, Excel trực tiếp lên web</p>
+  <p>Đăng thông báo, lịch học, tài liệu và hình ảnh trực tiếp lên web</p>
 </header>
 
 <main>
   <section class="box" id="adminLoginBox">
     <h2>🔐 Đăng nhập quản trị</h2>
-    <p>Nhập mật khẩu quản trị để tải tài liệu lên web.</p>
+    <p>Nhập mật khẩu quản trị để đăng nội dung lên web.</p>
     <input type="password" id="adminPassword" class="input-box" placeholder="Nhập mật khẩu admin">
     <br><br>
     <button onclick="dangNhapAdmin()">Đăng nhập</button>
@@ -23,16 +24,44 @@
   </section>
 
   <section class="box" id="adminPanel" style="display:none;">
-    <h2>📤 Upload tài liệu</h2>
-    <p>Chọn file PDF, Word, Excel hoặc hình ảnh để đưa trực tiếp lên web lớp.</p>
+    <h2>📤 Đăng nội dung lên web</h2>
+    <p>Chọn mục hiển thị để file xuất hiện đúng tab trên website lớp.</p>
 
-    <input type="file" id="fileTaiLieu" class="input-box" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png">
-    <br><br>
-    <button onclick="uploadTaiLieu()">Tải file lên</button>
+    <div class="form-group">
+      <label>📝 Tiêu đề hiển thị</label>
+      <input type="text" id="tieuDeNoiDung" class="input-box" placeholder="Ví dụ: Thông báo họp phụ huynh">
+    </div>
+
+    <div class="form-group">
+      <label>📌 Chọn mục hiển thị</label>
+      <select id="loaiNoiDung" class="input-box">
+        <option value="thongbao">📢 Thông báo mới</option>
+        <option value="lichhoc">📅 Lịch học - Lịch kiểm tra</option>
+        <option value="tailieu">📚 Kho tài liệu lớp 5/3</option>
+        <option value="thuvienanh">🖼️ Thư viện ảnh hoạt động lớp</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label>📎 Chọn file</label>
+      <input type="file" id="fileTaiLieu" class="input-box" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp">
+    </div>
+
+    <button onclick="uploadNoiDung()">Tải file lên</button>
     <p id="uploadStatus"></p>
 
     <hr>
-    <h2>📂 Danh sách tài liệu đã upload</h2>
+    <h2>📂 Danh sách nội dung đã đăng</h2>
+    <div class="form-group">
+      <label>🔎 Lọc theo mục</label>
+      <select id="boLocDanhSach" class="input-box" onchange="taiDanhSachNoiDungAdmin()">
+        <option value="tatca">Tất cả các mục</option>
+        <option value="thongbao">Thông báo mới</option>
+        <option value="lichhoc">Lịch học - Lịch kiểm tra</option>
+        <option value="tailieu">Kho tài liệu lớp 5/3</option>
+        <option value="thuvienanh">Thư viện ảnh hoạt động lớp</option>
+      </select>
+    </div>
     <div id="adminDanhSachTaiLieu">Đang tải danh sách...</div>
   </section>
 </main>
