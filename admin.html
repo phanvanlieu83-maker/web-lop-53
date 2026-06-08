@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Quản trị tài liệu lớp 5/3</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>QUẢN TRỊ TÀI LIỆU LỚP 5/3</h1>
+  <h2>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h2>
+  <p>Upload PDF, Word, Excel trực tiếp lên web</p>
+</header>
+
+<main>
+  <section class="box" id="adminLoginBox">
+    <h2>🔐 Đăng nhập quản trị</h2>
+    <p>Nhập mật khẩu quản trị để tải tài liệu lên web.</p>
+    <input type="password" id="adminPassword" class="input-box" placeholder="Nhập mật khẩu admin">
+    <br><br>
+    <button onclick="dangNhapAdmin()">Đăng nhập</button>
+    <p id="adminLoginMsg"></p>
+  </section>
+
+  <section class="box" id="adminPanel" style="display:none;">
+    <h2>📤 Upload tài liệu</h2>
+    <p>Chọn file PDF, Word, Excel hoặc hình ảnh để đưa trực tiếp lên web lớp.</p>
+
+    <input type="file" id="fileTaiLieu" class="input-box" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png">
+    <br><br>
+    <button onclick="uploadTaiLieu()">Tải file lên</button>
+    <p id="uploadStatus"></p>
+
+    <hr>
+    <h2>📂 Danh sách tài liệu đã upload</h2>
+    <div id="adminDanhSachTaiLieu">Đang tải danh sách...</div>
+  </section>
+</main>
+
+<footer>
+  © 2026 - Quản trị web lớp cô Trà My
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

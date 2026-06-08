@@ -1,0 +1,13 @@
+HƯỚNG DẪN DÙNG CHỨC NĂNG UPLOAD TÀI LIỆU
+
+1. Mở file admin.html trong trình duyệt.
+2. Mật khẩu mặc định: lop53@2026
+3. Chọn file PDF, Word, Excel hoặc ảnh rồi bấm Tải file lên.
+4. Mở index.html, vào mục Kho tài liệu lớp 5/3 để xem tài liệu.
+
+LƯU Ý QUAN TRỌNG VỀ SUPABASE:
+Để upload/list/delete hoạt động, bucket tailieu cần có policy cho phép thao tác với storage.objects.
+Trong Supabase vào Storage > Policies để tạo policy phù hợp.
+
+Mật khẩu admin trong file admin.js chỉ là mật khẩu đơn giản ở phía trình duyệt.
+Không dùng cho dữ liệu quá riêng tư.

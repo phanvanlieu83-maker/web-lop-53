@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Cổng thông tin lớp cô Trà My</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<header>
+
+<img src="images/logo.png" class="logo">
+
+<h1>CỔNG THÔNG TIN LỚP CÔ TRÀ MY</h1>
+
+<h2>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h2>
+
+<p>Kết nối gia đình - Nhà trường - Học sinh</p>
+
+</header>
+
+<nav>
+<a href="#gioithieu">Giới thiệu</a>
+<a href="#thongbao">Thông báo</a>
+<a href="#lichhoc">Lịch học</a>
+<a href="#phuhuynh">Phụ huynh</a>
+<a href="#trochoi">Trò chơi</a>
+<a href="#toanhoc">Tính nhanh</a>
+<a href="#tailieu">Tài liệu</a>
+<a href="#thuvien">Thư viện ảnh</a>
+<a href="#lienhe">Liên hệ</a>
+</nav>
+
+<main>
+
+<section id="gioithieu" class="box">
+  <h2>Giới thiệu lớp</h2>
+  <p>
+    Kính chào quý phụ huynh và các em học sinh!
+    Đây là cổng thông tin của lớp cô Trà My, dùng để cập nhật thông báo,
+    lịch học, hoạt động của lớp và hỗ trợ phụ huynh theo dõi quá trình học tập của học sinh.
+  </p>
+
+  <div class="info">
+    <p><b>Lớp:</b> 5/3</p>
+    <p><b>Năm học:</b> 2025 - 2026</p>
+    <p><b>Giáo viên chủ nhiệm:</b> Nguyễn Thị Trà My</p>
+  </div>
+</section>
+
+<section id="thongbao" class="box">
+  <h2>Thông báo mới</h2>
+  <div id="danhSachThongBao">
+  <p>Đang tải thông báo...</p>
+</div>
+</section>
+
+<section id="lichhoc" class="box">
+  <h2>Lịch học - Lịch kiểm tra</h2>
+  <p>Phụ huynh theo dõi lịch học, lịch kiểm tra và các hoạt động của lớp tại đây.</p>
+</section>
+
+<section id="baikiemtra" class="box">
+  <h2>📝 Tham gia làm bài kiểm tra</h2>
+  <p>
+    Học sinh chọn đúng đợt kiểm tra để tham gia làm bài theo hướng dẫn của giáo viên.
+  </p>
+
+  <div class="test-grid">
+
+    <a class="test-card" href="#" target="_blank">
+      <h3>Giữa kì 1</h3>
+      <p>Bấm để làm bài kiểm tra giữa học kì 1.</p>
+    </a>
+
+    <a class="test-card" href="#" target="_blank">
+      <h3>Cuối kì 1</h3>
+      <p>Bấm để làm bài kiểm tra cuối học kì 1.</p>
+    </a>
+
+    <a class="test-card" href="#" target="_blank">
+      <h3>Giữa kì 2</h3>
+      <p>Bấm để làm bài kiểm tra giữa học kì 2.</p>
+    </a>
+
+    <a class="test-card" href="#" target="_blank">
+      <h3>Cuối kì 2</h3>
+      <p>Bấm để làm bài kiểm tra cuối học kì 2.</p>
+    </a>
+
+  </div>
+</section>
+<section id="phuhuynh" class="box">
+
+<h2>🔐 Cổng phụ huynh</h2>
+
+<p>Nhập họ tên học sinh và mật khẩu để xem kết quả học tập.</p>
+<div class="form-group">
+    <label>📚 Chọn năm học</label>
+
+    <select id="namhoc" class="input-box">
+        <option value="2025-2026">Năm học 2025 - 2026 | Lớp 5/3</option>
+        <option value="2024-2025">Năm học 2024 - 2025 | Lớp 3/1</option>
+        <option value="2023-2024">Năm học 2023 - 2024 | Lớp 5/2</option>
+        <option value="2022-2023">Năm học 2022 - 2023 | Lớp 5/2</option>
+        <option value="2021-2022">Năm học 2021 - 2022 | Lớp 5/1</option>
+    </select>
+
+<br><br>
+
+<input
+type="text"
+id="tenhs"
+class="input-box"
+placeholder="👤 Nhập họ tên học sinh">
+
+<br><br>
+
+<input
+type="password"
+id="matkhau"
+class="input-box"
+placeholder="🔒 Nhập mật khẩu">
+
+<br><br>
+</div>
+<button onclick="dangNhapHocSinh()">
+Đăng nhập
+</button>
+
+<div id="ketQuaHocSinh"></div>
+
+</section>
+
+<section id="namhoc" class="box">
+  <h2>Lưu trữ các năm học</h2>
+  <p>
+    Phụ huynh có thể xem lại thông tin, hình ảnh và hoạt động của các lớp cô Trà My đã chủ nhiệm qua từng năm học.
+  </p>
+
+  <div id="dsNamHoc" class="year-list"></div>
+<section id="trochoi" class="box">
+  <h2>🎈 Trò chơi: Đập bóng chính tả</h2>
+  <p>Em hãy bấm vào quả bóng có từ viết đúng chính tả.</p>
+
+  <div class="score-board">
+    Điểm: <span id="diem">0</span>
+  </div>
+
+  <div id="gameArea" class="game-area"></div>
+<p id="ketQuaChinhTa"></p>
+
+  <button onclick="batDauTroChoi()">Bắt đầu chơi</button>
+</section>
+<section id="toanhoc" class="box">
+  <h2>🧮 Trò chơi: Tính nhanh Toán học 3.0</h2>
+  <p>Em hãy chọn đáp án đúng. Mỗi lượt chơi gồm 10 câu hỏi.</p>
+
+  <div class="math-game">
+    <div class="math-info">
+      <span>Điểm: <b id="diemToan">0</b></span>
+      <span>Câu đúng: <b id="cauDungToan">0</b></span>
+      <span>Câu: <b id="soCauToan">0</b>/10</span>
+      <span id="dongHoToan">⏰ 60 giây</span>
+    </div>
+
+    <div id="phepTinh" class="math-question">Bấm bắt đầu để chơi</div>
+
+    <div id="luaChonToan" class="answer-grid"></div>
+
+    <button onclick="batDauToan()">Bắt đầu</button>
+
+    <p id="ketQuaToan" class="math-result"></p>
+  </div>
+</section>
+
+
+<section id="tailieu" class="box">
+  <h2>📂 Kho tài liệu lớp 5/3</h2>
+  <p>Phụ huynh và học sinh có thể xem hoặc tải các tài liệu do giáo viên cập nhật.</p>
+  <div id="danhSachTaiLieu">
+    <p>Đang tải tài liệu...</p>
+  </div>
+</section>
+
+<section id="thuvien" class="box">
+  <h2>Thư viện ảnh hoạt động lớp</h2>
+  <p>Nơi lưu giữ hình ảnh các hoạt động, phong trào và kỷ niệm của lớp trong năm học.</p>
+</section>
+
+<section id="lienhe" class="box">
+  <h2>Liên hệ giáo viên chủ nhiệm</h2>
+  <p><b>Giáo viên chủ nhiệm:</b> Nguyễn Thị Trà My</p>
+  <p><b>Trường:</b> Tiểu học Ngô Quyền</p>
+  <p><b>Nội dung liên hệ:</b> Trao đổi tình hình học tập, rèn luyện và các hoạt động của học sinh.</p>
+</section>
+
+</main>
+
+<footer>
+  © 2026 - Cổng thông tin lớp cô Trà My - Trường Tiểu học Ngô Quyền
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
