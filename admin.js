@@ -58,7 +58,9 @@ async function uploadFileNeuCo(prefix) {
   const input = document.getElementById("fileUpload");
   if (!input.files || input.files.length === 0) return "";
 
-  const file = input.files[0];
+ const urls = [];
+
+for (const file of input.files) {
   const path = prefix + "/" + Date.now() + "_" + lamSachTenFile(file.name);
 
   const { error } = await supabaseClient.storage
@@ -67,10 +69,15 @@ async function uploadFileNeuCo(prefix) {
 
   if (error) throw error;
 
-  return supabaseClient.storage
+  const publicUrl = supabaseClient.storage
     .from(SUPABASE_BUCKET)
     .getPublicUrl(path)
     .data.publicUrl;
+
+  urls.push(publicUrl);
+}
+
+return urls.join("|");
 }
 
 async function luuNoiDung() {
