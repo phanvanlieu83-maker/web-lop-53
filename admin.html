@@ -10,7 +10,7 @@
 <header>
   <h1>QUẢN TRỊ NỘI DUNG LỚP 5/3</h1>
   <h2>TRƯỜNG TIỂU HỌC NGÔ QUYỀN</h2>
-  <p>Đăng thông báo, lịch học, tài liệu và hình ảnh trực tiếp lên web</p>
+  <p>Đăng thông báo, lịch học, tài liệu, thư viện ảnh và ảnh các năm học cũ</p>
 </header>
 
 <main>
@@ -25,21 +25,34 @@
 
   <section class="box" id="adminPanel" style="display:none;">
     <h2>📤 Đăng nội dung lên web</h2>
-    <p>Chọn mục hiển thị để file xuất hiện đúng tab trên website lớp.</p>
+    <p>Chọn đúng mục để nội dung xuất hiện đúng tab trên website lớp.</p>
 
     <div class="form-group">
       <label>📝 Tiêu đề hiển thị</label>
-      <input type="text" id="tieuDeNoiDung" class="input-box" placeholder="Ví dụ: Thông báo họp phụ huynh">
+      <input type="text" id="tieuDeNoiDung" class="input-box" placeholder="Ví dụ: Thông báo họp phụ huynh tháng 9">
     </div>
 
     <div class="form-group">
       <label>📌 Chọn mục hiển thị</label>
-      <select id="loaiNoiDung" class="input-box">
+      <select id="loaiNoiDung" class="input-box" onchange="doiLoaiNoiDungAdmin()">
         <option value="thongbao">📢 Thông báo mới</option>
         <option value="lichhoc">📅 Lịch học - Lịch kiểm tra</option>
         <option value="tailieu">📚 Kho tài liệu lớp 5/3</option>
-        <option value="thuvienanh">🖼️ Thư viện ảnh hoạt động lớp</option>
+        <option value="thuvienanh">🖼️ Thư viện ảnh năm học hiện tại</option>
+        <option value="namhoc">🗂️ Hình ảnh các năm học trước</option>
       </select>
+    </div>
+
+    <div class="form-group" id="chonNamHocBox" style="display:none;">
+      <label>📚 Chọn năm học lưu trữ</label>
+      <select id="namHocLuuTru" class="input-box">
+        <option value="2025-2026">Năm học 2025 - 2026 | Lớp 5/3</option>
+        <option value="2024-2025">Năm học 2024 - 2025 | Lớp 3/1</option>
+        <option value="2023-2024">Năm học 2023 - 2024 | Lớp 5/2</option>
+        <option value="2022-2023">Năm học 2022 - 2023 | Lớp 5/2</option>
+        <option value="2021-2022">Năm học 2021 - 2022 | Lớp 5/1</option>
+      </select>
+      <p style="color:#666;margin-top:6px;">Mục này dùng để đưa ảnh hoạt động của các năm học cũ vào phần “Lưu trữ các năm học”.</p>
     </div>
 
     <div class="form-group">
@@ -59,7 +72,8 @@
         <option value="thongbao">Thông báo mới</option>
         <option value="lichhoc">Lịch học - Lịch kiểm tra</option>
         <option value="tailieu">Kho tài liệu lớp 5/3</option>
-        <option value="thuvienanh">Thư viện ảnh hoạt động lớp</option>
+        <option value="thuvienanh">Thư viện ảnh năm học hiện tại</option>
+        <option value="namhoc">Hình ảnh các năm học trước</option>
       </select>
     </div>
     <div id="adminDanhSachTaiLieu">Đang tải danh sách...</div>

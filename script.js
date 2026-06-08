@@ -594,7 +594,7 @@ hienThiNamHoc();
 
 
 // ===============================
-// NỘI DUNG SUPABASE THEO TỪNG TAB
+// NỘI DUNG SUPABASE THEO TỪNG TAB + ẢNH NĂM HỌC CŨ
 // ===============================
 const DANH_MUC_NOI_DUNG_WEB = {
   thongbao: {
@@ -662,7 +662,6 @@ function damBaoKhuVucHienThi(loai) {
 
   let section = document.getElementById(cauHinh.sectionId);
 
-  // Nếu chưa có tab Tài liệu trong index.html thì tự tạo sau mục Lịch học.
   if (!section && loai === "tailieu") {
     section = document.createElement("section");
     section.id = "tailieu";
@@ -680,7 +679,6 @@ function damBaoKhuVucHienThi(loai) {
       document.querySelector("main")?.appendChild(section);
     }
 
-    // Nếu menu chưa có Tài liệu thì tự thêm.
     const nav = document.querySelector("nav");
     if (nav && !nav.querySelector('a[href="#tailieu"]')) {
       const link = document.createElement("a");
@@ -696,17 +694,9 @@ function damBaoKhuVucHienThi(loai) {
   container = document.createElement("div");
   container.id = cauHinh.containerId;
 
-  if (loai === "lichhoc") {
-    const p = section.querySelector("p");
-    if (p) p.insertAdjacentElement("afterend", container);
-    else section.appendChild(container);
-  } else if (loai === "thuvienanh") {
-    const p = section.querySelector("p");
-    if (p) p.insertAdjacentElement("afterend", container);
-    else section.appendChild(container);
-  } else {
-    section.appendChild(container);
-  }
+  const p = section.querySelector("p");
+  if (p) p.insertAdjacentElement("afterend", container);
+  else section.appendChild(container);
 
   return container;
 }
@@ -722,10 +712,7 @@ async function taiNoiDungTheoMuc(loai) {
 
   const { data, error } = await supabaseClient.storage
     .from(SUPABASE_BUCKET)
-    .list(cauHinh.thuMuc, {
-      limit: 100,
-      sortBy: { column: "created_at", order: "desc" }
-    });
+    .list(cauHinh.thuMuc, { limit: 100, sortBy: { column: "created_at", order: "desc" } });
 
   if (error) {
     khuVuc.innerHTML = "<p style='color:red;'>Chưa tải được nội dung.</p>";
@@ -754,15 +741,13 @@ async function taiNoiDungTheoMuc(loai) {
           </div>
           <div style="margin:10px 0 18px 0;">
             <img src="${publicUrl}" alt="${tenHienThi}" style="max-width:100%;border-radius:12px;box-shadow:0 3px 10px rgba(0,0,0,0.12);">
-          </div>
-        `;
+          </div>`;
       } else {
         html += `
           <div class="tai-lieu-item">
             <span>${layIconTaiLieu(file.name)} ${tenHienThi}</span>
             <a href="${publicUrl}" target="_blank">Xem / Tải</a>
-          </div>
-        `;
+          </div>`;
       }
     });
     html += "</div>";
@@ -771,7 +756,6 @@ async function taiNoiDungTheoMuc(loai) {
   }
 
   let html = '<div class="tai-lieu-list">';
-
   danhSach.forEach(function(file) {
     const duongDan = `${cauHinh.thuMuc}/${file.name}`;
     const publicUrl = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(duongDan).data.publicUrl;
@@ -781,12 +765,78 @@ async function taiNoiDungTheoMuc(loai) {
       <div class="tai-lieu-item">
         <span>${cauHinh.icon} ${layIconTaiLieu(file.name)} ${tenHienThi}</span>
         <a href="${publicUrl}" target="_blank">Xem / Tải</a>
-      </div>
-    `;
+      </div>`;
   });
-
   html += "</div>";
   khuVuc.innerHTML = html;
+}
+
+function renderNamHocCoThuVienAnh() {
+  const khuVuc = document.getElementById("dsNamHoc");
+  if (!khuVuc || typeof danhSachNamHoc === "undefined") return;
+
+  let html = "";
+  danhSachNamHoc.forEach(function(item) {
+    const maNam = item.namHoc.replace(/\s/g, "");
+    html += `
+      <div class="year-card">
+        <h3>${item.moTa}</h3>
+        <p><b>Lớp:</b> ${item.lop}</p>
+        <p><b>Năm học:</b> ${item.namHoc}</p>
+        <p><b>Trạng thái:</b> ${item.trangThai}</p>
+        <a class="year-btn" href="#phuhuynh">Xem kết quả</a>
+        <div style="margin-top:15px;">
+          <h4>🖼️ Hình ảnh năm học</h4>
+          <div id="anhNamHoc-${maNam}"><p>Đang tải hình ảnh...</p></div>
+        </div>
+      </div>`;
+  });
+
+  khuVuc.innerHTML = html;
+}
+
+async function taiAnhNamHoc(item) {
+  if (typeof supabaseClient === "undefined") return;
+  const namFolder = item.namHoc.replace(/\s/g, "");
+  const maNam = item.namHoc.replace(/\s/g, "");
+  const khuVuc = document.getElementById(`anhNamHoc-${maNam}`);
+  if (!khuVuc) return;
+
+  const { data, error } = await supabaseClient.storage
+    .from(SUPABASE_BUCKET)
+    .list(`namhoc/${namFolder}`, { limit: 100, sortBy: { column: "created_at", order: "desc" } });
+
+  if (error) {
+    khuVuc.innerHTML = "<p>Chưa có hình ảnh.</p>";
+    return;
+  }
+
+  const danhSachAnh = (data || []).filter(file => file.name && file.name !== ".emptyFolderPlaceholder" && laFileAnh(file.name));
+  if (danhSachAnh.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có hình ảnh.</p>";
+    return;
+  }
+
+  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-top:10px;">';
+  danhSachAnh.forEach(function(file) {
+    const duongDan = `namhoc/${namFolder}/${file.name}`;
+    const publicUrl = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(duongDan).data.publicUrl;
+    const tenHienThi = layTenHienThiTuFile(file.name);
+    html += `
+      <a href="${publicUrl}" target="_blank" title="${tenHienThi}">
+        <img src="${publicUrl}" alt="${tenHienThi}" style="width:100%;height:90px;object-fit:cover;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+      </a>`;
+  });
+  html += "</div>";
+  khuVuc.innerHTML = html;
+}
+
+async function taiTatCaAnhNamHoc() {
+  if (typeof danhSachNamHoc === "undefined") return;
+  renderNamHocCoThuVienAnh();
+  for (const item of danhSachNamHoc) {
+    await taiAnhNamHoc(item);
+  }
 }
 
 async function taiTatCaNoiDungSupabase() {
@@ -795,9 +845,9 @@ async function taiTatCaNoiDungSupabase() {
   await taiNoiDungTheoMuc("lichhoc");
   await taiNoiDungTheoMuc("tailieu");
   await taiNoiDungTheoMuc("thuvienanh");
+  await taiTatCaAnhNamHoc();
 }
 
-// Giữ tên hàm cũ để tương thích.
 function taiDanhSachTaiLieu() {
   return taiNoiDungTheoMuc("tailieu");
 }

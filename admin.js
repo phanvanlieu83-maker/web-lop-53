@@ -1,31 +1,27 @@
 // ===============================
-// QUẢN TRỊ NỘI DUNG SUPABASE
+// QUẢN TRỊ NỘI DUNG SUPABASE 2.0
 // ===============================
-// Mật khẩu quản trị. Có thể đổi tại đây.
 const ADMIN_PASSWORD = "lop53@2026";
 
 const DANH_MUC_NOI_DUNG = {
-  thongbao: {
-    ten: "Thông báo mới",
-    icon: "📢",
-    thuMuc: "thongbao"
-  },
-  lichhoc: {
-    ten: "Lịch học - Lịch kiểm tra",
-    icon: "📅",
-    thuMuc: "lichhoc"
-  },
-  tailieu: {
-    ten: "Kho tài liệu lớp 5/3",
-    icon: "📚",
-    thuMuc: "tailieu"
-  },
-  thuvienanh: {
-    ten: "Thư viện ảnh hoạt động lớp",
-    icon: "🖼️",
-    thuMuc: "thuvienanh"
-  }
+  thongbao: { ten: "Thông báo mới", icon: "📢", thuMuc: "thongbao" },
+  lichhoc: { ten: "Lịch học - Lịch kiểm tra", icon: "📅", thuMuc: "lichhoc" },
+  tailieu: { ten: "Kho tài liệu lớp 5/3", icon: "📚", thuMuc: "tailieu" },
+  thuvienanh: { ten: "Thư viện ảnh năm học hiện tại", icon: "🖼️", thuMuc: "thuvienanh" },
+  namhoc: { ten: "Hình ảnh các năm học trước", icon: "🗂️", thuMuc: "namhoc" }
 };
+
+function doiLoaiNoiDungAdmin() {
+  const loai = document.getElementById("loaiNoiDung")?.value;
+  const box = document.getElementById("chonNamHocBox");
+  const inputFile = document.getElementById("fileTaiLieu");
+  if (box) box.style.display = loai === "namhoc" ? "block" : "none";
+  if (inputFile) {
+    inputFile.accept = loai === "namhoc" || loai === "thuvienanh"
+      ? ".jpg,.jpeg,.png,.webp"
+      : ".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.jpg,.jpeg,.png,.webp";
+  }
+}
 
 function dangNhapAdmin() {
   const pass = document.getElementById("adminPassword").value.trim();
@@ -35,6 +31,7 @@ function dangNhapAdmin() {
     sessionStorage.setItem("adminDaDangNhap", "true");
     document.getElementById("adminLoginBox").style.display = "none";
     document.getElementById("adminPanel").style.display = "block";
+    doiLoaiNoiDungAdmin();
     taiDanhSachNoiDungAdmin();
   } else {
     msg.innerHTML = "<span style='color:red;font-weight:bold;'>Sai mật khẩu quản trị.</span>";
@@ -42,6 +39,7 @@ function dangNhapAdmin() {
 }
 
 window.addEventListener("DOMContentLoaded", function () {
+  doiLoaiNoiDungAdmin();
   if (sessionStorage.getItem("adminDaDangNhap") === "true") {
     const loginBox = document.getElementById("adminLoginBox");
     const adminPanel = document.getElementById("adminPanel");
@@ -63,9 +61,7 @@ function lamSachTenFile(ten) {
 }
 
 function lamSlugTieuDe(text) {
-  return lamSachTenFile(text || "noi-dung")
-    .replace(/\.[^.]+$/, "")
-    .substring(0, 80);
+  return lamSachTenFile(text || "noi-dung").replace(/\.[^.]+$/, "").substring(0, 80);
 }
 
 function layIconFile(tenFile) {
@@ -80,10 +76,22 @@ function layIconFile(tenFile) {
 
 function layTenHienThi(duongDanHoacTenFile) {
   const tenFile = duongDanHoacTenFile.split("/").pop();
-  // Dạng file: 1780000000000_Tieu-De__ten-file.pdf
   const boThoiGian = tenFile.replace(/^\d+_/, "");
   const phanTieuDe = boThoiGian.split("__")[0] || boThoiGian;
   return phanTieuDe.replace(/-/g, " ");
+}
+
+function layDuongDanUpload(loai, tieuDe, tenFileGoc) {
+  const danhMuc = DANH_MUC_NOI_DUNG[loai];
+  const slugTieuDe = lamSlugTieuDe(tieuDe);
+  const tenFile = `${Date.now()}_${slugTieuDe}__${lamSachTenFile(tenFileGoc)}`;
+
+  if (loai === "namhoc") {
+    const namHoc = document.getElementById("namHocLuuTru")?.value || "khac";
+    return `${danhMuc.thuMuc}/${namHoc}/${tenFile}`;
+  }
+
+  return `${danhMuc.thuMuc}/${tenFile}`;
 }
 
 async function uploadNoiDung() {
@@ -109,18 +117,13 @@ async function uploadNoiDung() {
   }
 
   const file = input.files[0];
-  const tenFileGoc = lamSachTenFile(file.name);
-  const slugTieuDe = lamSlugTieuDe(tieuDe);
-  const tenFile = `${danhMuc.thuMuc}/${Date.now()}_${slugTieuDe}__${tenFileGoc}`;
+  const duongDan = layDuongDanUpload(loai, tieuDe, file.name);
 
   status.innerHTML = "Đang tải file lên...";
 
   const { error } = await supabaseClient.storage
     .from(SUPABASE_BUCKET)
-    .upload(tenFile, file, {
-      cacheControl: "3600",
-      upsert: false
-    });
+    .upload(duongDan, file, { cacheControl: "3600", upsert: false });
 
   if (error) {
     status.innerHTML = "<span style='color:red;font-weight:bold;'>Lỗi: " + error.message + "</span>";
@@ -134,27 +137,39 @@ async function uploadNoiDung() {
   taiDanhSachNoiDungAdmin();
 }
 
-async function layFileTheoDanhMuc(loai) {
-  const danhMuc = DANH_MUC_NOI_DUNG[loai];
-  if (!danhMuc) return [];
-
+async function layFileTrongThuMuc(thuMuc, loai, namHoc = "") {
   const { data, error } = await supabaseClient.storage
     .from(SUPABASE_BUCKET)
-    .list(danhMuc.thuMuc, {
-      limit: 100,
-      sortBy: { column: "created_at", order: "desc" }
-    });
+    .list(thuMuc, { limit: 100, sortBy: { column: "created_at", order: "desc" } });
 
   if (error) throw error;
 
   return (data || [])
-    .filter(file => file.name && file.name !== ".emptyFolderPlaceholder")
+    .filter(file => file.name && file.name !== ".emptyFolderPlaceholder" && !file.id?.startsWith("folder"))
     .map(file => ({
       ...file,
       loai,
-      thuMuc: danhMuc.thuMuc,
-      duongDan: `${danhMuc.thuMuc}/${file.name}`
+      namHoc,
+      thuMuc,
+      duongDan: `${thuMuc}/${file.name}`
     }));
+}
+
+async function layFileTheoDanhMuc(loai) {
+  const danhMuc = DANH_MUC_NOI_DUNG[loai];
+  if (!danhMuc) return [];
+
+  if (loai !== "namhoc") {
+    return layFileTrongThuMuc(danhMuc.thuMuc, loai);
+  }
+
+  const cacNam = ["2025-2026", "2024-2025", "2023-2024", "2022-2023", "2021-2022"];
+  let ketQua = [];
+  for (const namHoc of cacNam) {
+    const files = await layFileTrongThuMuc(`namhoc/${namHoc}`, loai, namHoc);
+    ketQua = ketQua.concat(files);
+  }
+  return ketQua;
 }
 
 async function taiDanhSachNoiDungAdmin() {
@@ -166,7 +181,6 @@ async function taiDanhSachNoiDungAdmin() {
 
   try {
     let danhSach = [];
-
     if (boLoc === "tatca") {
       for (const loai of Object.keys(DANH_MUC_NOI_DUNG)) {
         const files = await layFileTheoDanhMuc(loai);
@@ -183,27 +197,21 @@ async function taiDanhSachNoiDungAdmin() {
     }
 
     let html = '<div class="tai-lieu-list">';
-
     danhSach.forEach(function(file) {
       const danhMuc = DANH_MUC_NOI_DUNG[file.loai];
-      const publicUrl = supabaseClient.storage
-        .from(SUPABASE_BUCKET)
-        .getPublicUrl(file.duongDan)
-        .data.publicUrl;
-
+      const publicUrl = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(file.duongDan).data.publicUrl;
       const tenHienThi = layTenHienThi(file.name);
+      const nhanNamHoc = file.loai === "namhoc" ? ` <b>(${file.namHoc})</b>` : "";
 
       html += `
         <div class="tai-lieu-item">
-          <span>${danhMuc.icon} <b>${danhMuc.ten}:</b> ${layIconFile(file.name)} ${tenHienThi}</span>
+          <span>${danhMuc.icon} <b>${danhMuc.ten}${nhanNamHoc}:</b> ${layIconFile(file.name)} ${tenHienThi}</span>
           <div class="file-actions">
             <a href="${publicUrl}" target="_blank">Xem</a>
             <button class="delete-file-btn" onclick="xoaNoiDung('${file.duongDan.replace(/'/g, "\\'")}')">Xóa</button>
           </div>
-        </div>
-      `;
+        </div>`;
     });
-
     html += "</div>";
     khuVuc.innerHTML = html;
   } catch (error) {
@@ -213,24 +221,10 @@ async function taiDanhSachNoiDungAdmin() {
 
 async function xoaNoiDung(duongDan) {
   if (!confirm("Bạn có chắc muốn xóa nội dung này không?")) return;
-
-  const { error } = await supabaseClient.storage
-    .from(SUPABASE_BUCKET)
-    .remove([duongDan]);
-
+  const { error } = await supabaseClient.storage.from(SUPABASE_BUCKET).remove([duongDan]);
   if (error) {
-    alert("Không xóa được file: " + error.message);
+    alert("Không xóa được nội dung: " + error.message);
     return;
   }
-
-  taiDanhSachNoiDungAdmin();
-}
-
-// Giữ tên hàm cũ để tránh lỗi nếu HTML cũ còn gọi uploadTaiLieu().
-function uploadTaiLieu() {
-  uploadNoiDung();
-}
-
-function taiDanhSachTaiLieuAdmin() {
   taiDanhSachNoiDungAdmin();
 }
