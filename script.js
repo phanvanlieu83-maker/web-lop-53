@@ -811,3 +811,52 @@ document.addEventListener("DOMContentLoaded", function () {
   taiVideoV3();
   taiNamHocV3();
 });
+async function taiThuVienAnhV5() {
+  const khuVuc = document.getElementById("danhSachAnh");
+  if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  const { data, error } = await supabaseClient
+    .from("thu_vien_anh")
+    .select("*")
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    khuVuc.innerHTML = "<p>Chưa tải được thư viện ảnh.</p>";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có hình ảnh nào.</p>";
+    return;
+  }
+
+  let html = '<div class="gallery-grid">';
+
+  data.forEach(item => {
+    const linkAnh = item.imageurl || item.fileurl || "";
+
+    if (!linkAnh) return;
+
+    const danhSachLink = linkAnh.split("|");
+
+    danhSachLink.forEach(url => {
+      html += `
+        <div class="gallery-card">
+          <a href="${url}" target="_blank">
+            <img src="${url}" alt="${item.tieude || "Ảnh hoạt động"}">
+          </a>
+          <p><b>${item.tieude || "Ảnh hoạt động"}</b></p>
+          <small>${item.namhoc || ""} ${item.album ? " - " + item.album : ""}</small>
+        </div>
+      `;
+    });
+  });
+
+  html += "</div>";
+  khuVuc.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  taiThuVienAnhV5();
+});
