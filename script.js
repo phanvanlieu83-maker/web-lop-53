@@ -830,8 +830,7 @@ document.addEventListener("DOMContentLoaded", function () {
   taiLichHocV3();
   taiTaiLieuV3();
   taiThuVienAnhV3();
-  taiVideoV3();
-  taiNamHocV3();
+   taiNamHocV3();
 });
 async function taiThuVienAnhV5() {
   const khuVuc = document.getElementById("danhSachAnh");
