@@ -1,5 +1,5 @@
-// ADMIN 5.0 - Website lớp 5/3
-// Dùng Supabase Database + Storage. Cần các cột: is_deleted, deleted_at, album, is_pinned.
+// ADMIN 5.1 - Website lớp 5/3
+// Gộp ảnh + video + link vào bảng hoat_dong_lop.
 
 let loaiHienTai = "thong_bao";
 const ADMIN_USER = "admin";
@@ -9,8 +9,7 @@ const cauHinh = {
   thong_bao: { icon: "📢", ten: "Thông báo", table: "thong_bao", fileCol: "fileurl" },
   lich_hoc: { icon: "📅", ten: "Lịch học", table: "lich_hoc", fileCol: "fileurl" },
   tai_lieu: { icon: "📚", ten: "Tài liệu", table: "tai_lieu", fileCol: "fileurl" },
-  thu_vien_anh: { icon: "🖼️", ten: "Thư viện ảnh", table: "thu_vien_anh", fileCol: "imageurl" },
-  video_lop: { icon: "🎬", ten: "Video", table: "video_lop", fileCol: "videourl" },
+  hoat_dong_lop: { icon: "🎉", ten: "Hoạt động lớp", table: "hoat_dong_lop", fileCol: "url" },
   nam_hoc: { icon: "🏫", ten: "Năm học", table: "nam_hoc" }
 };
 
@@ -23,10 +22,10 @@ function dangNhapAdmin(){
   }else document.getElementById("loginMsg").innerHTML="<b style='color:red'>Sai tài khoản hoặc mật khẩu.</b>";
 }
 function dangXuatAdmin(){localStorage.removeItem("lop53_admin_login");location.reload();}
-function hienAdmin(){document.getElementById("loginBox").style.display="none";document.getElementById("adminApp").style.display="block";taiDashboard();taiDanhSachAdmin();}
+function hienAdmin(){document.getElementById("loginBox").style.display="none";document.getElementById("adminApp").style.display="block";taiDashboard();taiDanhSachAdmin();capNhatForm();}
 
 function lamSachTenFile(name){return (name||"file").normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/đ/g,"d").replace(/Đ/g,"D").replace(/[^a-zA-Z0-9._-]/g,"-");}
-function setStatus(msg, ok=true){document.getElementById("adminStatus").innerHTML=`<b style="color:${ok?'green':'red'}">${msg}</b>`;}
+function setStatus(msg, ok=true){document.getElementById("adminStatus").innerHTML=msg?`<b style="color:${ok?'green':'red'}">${msg}</b>`:"";}
 
 function chonLoai(loai, btn){
   loaiHienTai=loai;
@@ -46,14 +45,16 @@ function capNhatForm(){
   document.getElementById("formTitle").innerText=`${cfg.icon} Quản lý ${cfg.ten}`;
   document.getElementById("noiDungWrap").style.display=["thong_bao","lich_hoc"].includes(loaiHienTai)?"block":"none";
   document.getElementById("ngayWrap").style.display=loaiHienTai==="lich_hoc"?"block":"none";
-  document.getElementById("videoWrap").style.display=loaiHienTai==="video_lop"?"block":"none";
-  document.getElementById("fileWrap").style.display=["tai_lieu","thu_vien_anh","thong_bao","lich_hoc"].includes(loaiHienTai)?"block":"none";
-  document.getElementById("albumWrap").style.display=loaiHienTai==="thu_vien_anh"?"block":"none";
+  document.getElementById("activityTypeWrap").style.display=loaiHienTai==="hoat_dong_lop"?"block":"none";
+  document.getElementById("linkWrap").style.display=loaiHienTai==="hoat_dong_lop"?"block":"none";
+  document.getElementById("fileWrap").style.display=["tai_lieu","hoat_dong_lop","thong_bao","lich_hoc"].includes(loaiHienTai)?"block":"none";
+  document.getElementById("albumWrap").style.display=loaiHienTai==="hoat_dong_lop"?"block":"none";
   document.getElementById("namHocWrap").style.display=loaiHienTai==="nam_hoc"?"grid":"none";
 }
 
 function lamMoiForm(clearStatus=true){
-  ["editId","tieuDe","noiDung","ngayHoc","videoUrl","lop","trangThai","album"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  ["editId","tieuDe","noiDung","ngayHoc","linkUrl","lop","trangThai","album"].forEach(id=>{const el=document.getElementById(id);if(el)el.value="";});
+  document.getElementById("activityType").value="anh";
   document.getElementById("noiBat").checked=false;
   document.getElementById("fileUpload").value="";
   if(clearStatus) setStatus("");
@@ -73,7 +74,7 @@ async function uploadNhieuFile(prefix){
   return urls.join("|");
 }
 
-async function luuNoiDungV5(){
+async function luuNoiDungV51(){
   try{
     const cfg=cauHinh[loaiHienTai];
     const editId=document.getElementById("editId").value;
@@ -86,22 +87,23 @@ async function luuNoiDungV5(){
     let row={};
     if(loaiHienTai==="nam_hoc"){
       row={lop:document.getElementById("lop").value.trim(),namhoc:namhoc,mota:tieude,trangthai:document.getElementById("trangThai").value.trim(),is_deleted:false};
+    }else if(loaiHienTai==="hoat_dong_lop"){
+      const loai=document.getElementById("activityType").value;
+      const linkUrl=document.getElementById("linkUrl").value.trim();
+      const fileUrls=await uploadNhieuFile("hoat_dong_lop");
+      row={tieude,namhoc,is_deleted:false,is_pinned,loai,album:document.getElementById("album").value.trim(),url:fileUrls || linkUrl};
+      if(!row.url){setStatus("Vui lòng chọn file hoặc dán link hoạt động.",false);return;}
     }else{
       row={tieude,namhoc,is_deleted:false,is_pinned};
       if(["thong_bao","lich_hoc"].includes(loaiHienTai)) row.noidung=noidung;
       if(loaiHienTai==="lich_hoc") row.ngay=document.getElementById("ngayHoc").value || null;
-      if(loaiHienTai==="thu_vien_anh") row.album=document.getElementById("album").value.trim();
-      if(loaiHienTai==="video_lop") row.videourl=document.getElementById("videoUrl").value.trim();
       const fileUrls=await uploadNhieuFile(loaiHienTai);
       if(fileUrls && cfg.fileCol) row[cfg.fileCol]=fileUrls;
     }
 
     let result;
-    if(editId){
-      result=await supabaseClient.from(cfg.table).update(row).eq("id",editId);
-    }else{
-      result=await supabaseClient.from(cfg.table).insert([row]);
-    }
+    if(editId){ result=await supabaseClient.from(cfg.table).update(row).eq("id",editId); }
+    else{ result=await supabaseClient.from(cfg.table).insert([row]); }
     if(result.error) throw result.error;
     setStatus(editId?"✅ Đã cập nhật nội dung.":"✅ Đã lưu nội dung.");
     lamMoiForm(false);taiDashboard();taiDanhSachAdmin();
@@ -131,17 +133,18 @@ async function taiDanhSachAdmin(){
 
 function renderItem(item,cfg,deleted){
   const title=item.tieude||item.mota||item.namhoc||"Nội dung";
-  const desc=item.noidung||item.trangthai||item.album||"";
+  const desc=item.noidung||item.trangthai||item.album||item.loai||"";
   const pin=item.is_pinned?"<span class='badge'>📌 Nổi bật</span>":"";
   const album=item.album?`<span class='badge'>Album: ${item.album}</span>`:"";
   let preview="";
-  const url=item.fileurl||item.imageurl||item.videourl||"";
-  const first=url.split("|")[0];
-  if(first && (first.includes(".jpg")||first.includes(".jpeg")||first.includes(".png")||first.includes(".webp"))) preview=`<img class="preview-img" src="${first}">`;
+  const url=item.fileurl||item.imageurl||item.videourl||item.url||"";
+  const first=String(url).split("|")[0];
+  if(first && (first.includes(".jpg")||first.includes(".jpeg")||first.includes(".png")||first.includes(".webp")||first.includes("supabase.co/storage"))) preview=`<img class="preview-img" src="${first}">`;
+  const safe=JSON.stringify(item).replace(/'/g,"&#39;");
   return `<div class="list-item ${deleted?'deleted':''}">
     <div>${preview}<div class="item-title">${cfg.icon} ${title}</div><div>${desc}</div><div class="item-meta">Năm học: ${item.namhoc||""} ${pin} ${album}</div></div>
     <div class="actions">
-      ${deleted?`<button class="btn small green" onclick="khoiPhuc('${cfg.table}',${item.id})">♻️ Khôi phục</button><button class="btn small red" onclick="xoaVinhVien('${cfg.table}',${item.id})">❌ Xóa vĩnh viễn</button>`:`<button class="btn small blue" onclick='suaNoiDung(${JSON.stringify(item).replace(/'/g,"&#39;")})'>✏️ Sửa</button><button class="btn small red" onclick="duaVaoThungRac('${cfg.table}',${item.id})">🗑️ Xóa</button>`}
+      ${deleted?`<button class="btn small green" onclick="khoiPhuc('${cfg.table}',${item.id})">♻️ Khôi phục</button><button class="btn small red" onclick="xoaVinhVien('${cfg.table}',${item.id})">❌ Xóa vĩnh viễn</button>`:`<button class="btn small blue" onclick='suaNoiDung(${safe})'>✏️ Sửa</button><button class="btn small red" onclick="duaVaoThungRac('${cfg.table}',${item.id})">🗑️ Xóa</button>`}
     </div></div>`;
 }
 
@@ -151,10 +154,11 @@ function suaNoiDung(item){
   document.getElementById("noiDung").value=item.noidung||"";
   document.getElementById("namHoc").value=item.namhoc||"2025-2026";
   document.getElementById("ngayHoc").value=item.ngay||"";
-  document.getElementById("videoUrl").value=item.videourl||"";
+  document.getElementById("linkUrl").value=item.url||item.videourl||"";
   document.getElementById("lop").value=item.lop||"";
   document.getElementById("trangThai").value=item.trangthai||"";
   document.getElementById("album").value=item.album||"";
+  document.getElementById("activityType").value=item.loai||"anh";
   document.getElementById("noiBat").checked=!!item.is_pinned;
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -193,7 +197,7 @@ function caiDatKeoTha(){
   dz.addEventListener("drop",e=>{e.preventDefault();dz.classList.remove("drag");input.files=e.dataTransfer.files;});
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+window.addEventListener("DOMContentLoaded",()=>{
   if(localStorage.getItem("lop53_admin_login")==="1") hienAdmin();
-  capNhatForm();caiDatKeoTha();
+  caiDatKeoTha();
 });

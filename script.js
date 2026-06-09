@@ -439,6 +439,10 @@ console.log(data);
         </h3>
 
         <div class="student-desc">
+            Mã học sinh: <b>${data.mahs || data.MAHS || "Chưa cập nhật"}</b>
+        </div>
+
+        <div class="student-desc">
             Trường Tiểu học Ngô Quyền
         </div>
 
@@ -829,55 +833,127 @@ document.addEventListener("DOMContentLoaded", function () {
   taiThongBaoV3();
   taiLichHocV3();
   taiTaiLieuV3();
-  taiThuVienAnhV3();
-   taiNamHocV3();
+  taiHoatDongLopV51();
+  taiNamHocV3();
 });
-async function taiThuVienAnhV5() {
+
+// =====================================================
+// ADMIN/WEBSITE 5.1 - GỘP ẢNH + VIDEO + LINK VÀO HOẠT ĐỘNG LỚP
+// Đọc bảng mới: hoat_dong_lop
+// loai: anh | video | link
+// =====================================================
+
+function chuyenLinkYoutubeThanhEmbed(url) {
+  if (!url) return "";
+  let clean = String(url).trim();
+  if (clean.includes("youtube.com/watch?v=")) {
+    const id = clean.split("v=")[1].split("&")[0];
+    return "https://www.youtube.com/embed/" + id;
+  }
+  if (clean.includes("youtu.be/")) {
+    const id = clean.split("youtu.be/")[1].split("?")[0];
+    return "https://www.youtube.com/embed/" + id;
+  }
+  if (clean.includes("youtube.com/embed/")) return clean;
+  return clean;
+}
+
+function laAnh(url) {
+  return /\.(jpg|jpeg|png|gif|webp)(\?|$)/i.test(url || "");
+}
+
+function laVideoMp4(url) {
+  return /\.(mp4|webm|ogg)(\?|$)/i.test(url || "");
+}
+
+function renderMotHoatDong(item) {
+  const loai = item.loai || "anh";
+  const title = item.tieude || "Hoạt động lớp";
+  const namhoc = item.namhoc || "";
+  const album = item.album ? `<span class="activity-badge">📁 ${item.album}</span>` : "";
+  const pin = item.is_pinned ? `<span class="activity-badge pinned">📌 Nổi bật</span>` : "";
+  const rawUrl = item.url || item.imageurl || item.videourl || item.fileurl || "";
+  const urls = rawUrl ? String(rawUrl).split("|").filter(Boolean) : [];
+
+  let body = "";
+
+  if (loai === "video") {
+    const url = urls[0] || rawUrl;
+    const embed = chuyenLinkYoutubeThanhEmbed(url);
+    if (laVideoMp4(url)) {
+      body = `<video class="activity-video" src="${url}" controls></video>`;
+    } else {
+      body = `<div class="video-box"><iframe src="${embed}" frameborder="0" allowfullscreen></iframe></div>`;
+    }
+    if (url) body += `<p><a class="year-btn" href="${url}" target="_blank">Mở video trong tab mới</a></p>`;
+  } else if (loai === "link") {
+    const url = urls[0] || rawUrl;
+    body = `<p><a class="year-btn" href="${url}" target="_blank">🔗 Xem liên kết</a></p>`;
+  } else {
+    if (urls.length === 0) {
+      body = `<p>Chưa có ảnh.</p>`;
+    } else {
+      body = `<div class="activity-images">` + urls.map(url => {
+        if (laVideoMp4(url)) return `<video class="activity-thumb-video" src="${url}" controls></video>`;
+        if (laAnh(url) || url.includes("supabase.co/storage")) {
+          return `<a href="${url}" target="_blank"><img src="${url}" alt="${title}"></a>`;
+        }
+        return `<a class="year-btn" href="${url}" target="_blank">🔗 Mở file/link</a>`;
+      }).join("") + `</div>`;
+    }
+  }
+
+  return `
+    <div class="activity-card">
+      <h3>${loai === "video" ? "🎬" : loai === "link" ? "🔗" : "📸"} ${title}</h3>
+      <div class="activity-meta">${namhoc} ${album} ${pin}</div>
+      ${body}
+    </div>
+  `;
+}
+
+async function taiHoatDongLopV51() {
   const khuVuc = document.getElementById("danhSachAnh");
   if (!khuVuc || typeof supabaseClient === "undefined") return;
 
-  const { data, error } = await supabaseClient
-    .from("thu_vien_anh")
+  let { data, error } = await supabaseClient
+    .from("hoat_dong_lop")
     .select("*")
     .eq("is_deleted", false)
+    .order("is_pinned", { ascending: false })
     .order("created_at", { ascending: false });
 
-  if (error) {
-    khuVuc.innerHTML = "<p>Chưa tải được thư viện ảnh.</p>";
-    return;
+  // Nếu chưa tạo bảng mới hoặc chưa có dữ liệu, tự đọc tạm bảng cũ để web không trống.
+  if (error || !data || data.length === 0) {
+    const anhCu = await supabaseClient.from("thu_vien_anh").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
+    const videoCu = await supabaseClient.from("video_lop").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
+    data = [];
+    if (anhCu.data) {
+      data = data.concat(anhCu.data.map(x => ({...x, loai: "anh", url: x.imageurl || x.fileurl || ""})));
+    }
+    if (videoCu.data) {
+      data = data.concat(videoCu.data.map(x => ({...x, loai: "video", url: x.videourl || ""})));
+    }
   }
 
   if (!data || data.length === 0) {
-    khuVuc.innerHTML = "<p>Chưa có hình ảnh nào.</p>";
+    khuVuc.innerHTML = "<p>Chưa có hoạt động nào.</p>";
     return;
   }
 
-  let html = '<div class="gallery-grid">';
-
+  const nhomTheoAlbum = {};
   data.forEach(item => {
-    const linkAnh = item.imageurl || item.fileurl || "";
-
-    if (!linkAnh) return;
-
-    const danhSachLink = linkAnh.split("|");
-
-    danhSachLink.forEach(url => {
-      html += `
-        <div class="gallery-card">
-          <a href="${url}" target="_blank">
-            <img src="${url}" alt="${item.tieude || "Ảnh hoạt động"}">
-          </a>
-          <p><b>${item.tieude || "Ảnh hoạt động"}</b></p>
-          <small>${item.namhoc || ""} ${item.album ? " - " + item.album : ""}</small>
-        </div>
-      `;
-    });
+    const album = item.album || "Hoạt động chung";
+    if (!nhomTheoAlbum[album]) nhomTheoAlbum[album] = [];
+    nhomTheoAlbum[album].push(item);
   });
 
-  html += "</div>";
+  let html = "";
+  Object.keys(nhomTheoAlbum).forEach(album => {
+    html += `<div class="activity-album"><h3>📁 ${album}</h3><div class="activity-list">`;
+    html += nhomTheoAlbum[album].map(renderMotHoatDong).join("");
+    html += `</div></div>`;
+  });
+
   khuVuc.innerHTML = html;
 }
-
-document.addEventListener("DOMContentLoaded", function () {
-  taiThuVienAnhV5();
-});

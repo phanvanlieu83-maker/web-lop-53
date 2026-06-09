@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quản trị nội dung lớp 5/3 - Admin 5.0</title>
+  <title>Quản trị nội dung lớp 5/3 - Admin 5.1</title>
   <link rel="stylesheet" href="style.css" />
   <style>
     body{background:#f1f5f9;margin:0;font-family:Arial,sans-serif;color:#111827}.admin-wrap{max-width:1180px;margin:40px auto;background:#fff;padding:28px;border-radius:18px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
@@ -24,8 +24,8 @@
   <div id="adminApp" class="admin-wrap" style="display:none">
     <div class="admin-header">
       <div>
-        <h1>🛠️ Admin 5.0 - Cổng thông tin lớp 5/3</h1>
-        <p class="muted">Dashboard, sửa/xóa, thùng rác, album ảnh, kéo thả upload và tin nổi bật.</p>
+        <h1>🛠️ Admin 5.1 - Cổng thông tin lớp 5/3</h1>
+        <p class="muted">Gộp ảnh + video + link vào thư viện hoạt động lớp; giữ thông báo, lịch học, tài liệu, năm học và thùng rác.</p>
       </div>
       <button class="btn gray" onclick="dangXuatAdmin()">Đăng xuất</button>
     </div>
@@ -36,8 +36,7 @@
       <button class="tab active" onclick="chonLoai('thong_bao', this)">📢 Thông báo</button>
       <button class="tab" onclick="chonLoai('lich_hoc', this)">📅 Lịch học</button>
       <button class="tab" onclick="chonLoai('tai_lieu', this)">📚 Tài liệu</button>
-      <button class="tab" onclick="chonLoai('thu_vien_anh', this)">🖼️ Thư viện ảnh</button>
-      <button class="tab" onclick="chonLoai('video_lop', this)">🎬 Video</button>
+      <button class="tab" onclick="chonLoai('hoat_dong_lop', this)">🎉 Hoạt động lớp</button>
       <button class="tab" onclick="chonLoai('nam_hoc', this)">🏫 Năm học</button>
       <button class="tab" onclick="chonLoai('trash', this)">🗑️ Thùng rác</button>
     </div>
@@ -51,12 +50,13 @@
       </div>
       <div id="noiDungWrap"><label>Nội dung</label><textarea id="noiDung" placeholder="Nhập nội dung thông báo, lịch học hoặc ghi chú"></textarea></div>
       <div id="ngayWrap" style="display:none"><label>Ngày</label><input type="date" id="ngayHoc" /></div>
-      <div id="videoWrap" style="display:none"><label>Link video YouTube/online</label><input id="videoUrl" placeholder="Dán link video" /></div>
+      <div id="activityTypeWrap" style="display:none"><label>Loại hoạt động</label><select id="activityType"><option value="anh">📸 Ảnh / Album ảnh</option><option value="video">🎬 Video YouTube / MP4</option><option value="link">🔗 Link hoạt động</option></select></div>
+      <div id="linkWrap" style="display:none"><label>Link video hoặc link hoạt động</label><input id="linkUrl" placeholder="Dán link YouTube, Google Drive, Facebook hoặc website" /></div>
       <div id="namHocWrap" style="display:none" class="row"><div><label>Lớp</label><input id="lop" placeholder="Ví dụ: 5/3" /></div><div><label>Trạng thái</label><input id="trangThai" placeholder="Năm học hiện tại / Đã lưu trữ" /></div></div>
-      <div id="albumWrap" style="display:none"><label>Tên album/sự kiện ảnh</label><input id="album" placeholder="Ví dụ: Khai giảng, Trung thu, 20/11" /></div>
+      <div id="albumWrap" style="display:none"><label>Tên album/sự kiện</label><input id="album" placeholder="Ví dụ: Khai giảng, Trung thu, 20/11" /></div>
       <label><input type="checkbox" id="noiBat" style="width:auto;margin-right:6px" />📌 Ghim làm tin nổi bật</label>
-      <div id="fileWrap"><label>File/Ảnh đính kèm</label><div id="dropZone" class="drop-zone">Kéo thả file/ảnh vào đây hoặc bấm chọn file<br><small>Có thể chọn nhiều ảnh cùng lúc</small><input id="fileUpload" type="file" multiple style="display:block;margin:12px auto 0;max-width:430px" /></div></div>
-      <button class="btn green" onclick="luuNoiDungV5()">💾 Lưu nội dung</button>
+      <div id="fileWrap"><label>File/Ảnh/Video đính kèm</label><div id="dropZone" class="drop-zone">Kéo thả file/ảnh/video vào đây hoặc bấm chọn file<br><small>Có thể chọn nhiều ảnh cùng lúc</small><input id="fileUpload" type="file" multiple style="display:block;margin:12px auto 0;max-width:430px" /></div></div>
+      <button class="btn green" onclick="luuNoiDungV51()">💾 Lưu nội dung</button>
       <button class="btn blue" onclick="lamMoiForm()">🔄 Làm mới</button>
       <p id="adminStatus"></p>
     </div>
