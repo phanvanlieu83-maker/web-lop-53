@@ -27,9 +27,8 @@
 <a href="#phuhuynh">Phụ huynh</a>
 <a href="#trochoi">Trò chơi</a>
 <a href="#toanhoc">Tính nhanh</a>
+<a href="#tailieu">Tài liệu</a>
 <a href="#thuvien">Hoạt động lớp</a>
-<a href="#tuyenduong">Tuyên dương</a>
-<a href="#xinnghi">Xin nghỉ</a>
 <a href="#lienhe">Liên hệ</a>
 </nav>
 
@@ -96,7 +95,7 @@
 
 <h2>🔐 Cổng phụ huynh</h2>
 
-<p>Phụ huynh nhập tên hoặc mã học sinh và mật khẩu để xem kết quả học tập.</p>
+<p>Nhập họ tên học sinh và mật khẩu để xem kết quả học tập.</p>
 <div class="form-group">
     <label>📚 Chọn năm học</label>
 
@@ -176,33 +175,24 @@ placeholder="🔒 Nhập mật khẩu">
   </div>
 </section>
 
+
+<section id="tailieu" class="box">
+  <h2>📂 Kho tài liệu lớp 5/3</h2>
+  <p>Phụ huynh và học sinh có thể xem hoặc tải các tài liệu do giáo viên cập nhật.</p>
+  <div id="danhSachTaiLieu">
+    <p>Đang tải tài liệu...</p>
+  </div>
+</section>
 <section id="thuvien" class="box">
   <h2>🎉 Thư viện hoạt động lớp</h2>
-  <p>Nơi lưu giữ hình ảnh, video, liên kết hoạt động, phong trào và kỷ niệm của lớp trong năm học.</p>
-  <input id="timHoatDong" class="input-box" placeholder="🔎 Tìm hoạt động, album, năm học..." oninput="locHoatDongLop()">
-  <div id="danhSachHoatDong">
+  <p>Nơi lưu giữ hình ảnh, video, đường link hoạt động, phong trào và kỷ niệm của lớp theo từng năm học.</p>
+
+  <div class="activity-filter">
+    <input id="timHoatDong" class="input-box" placeholder="🔎 Tìm hoạt động, album, năm học..." oninput="locHoatDongV6()">
+  </div>
+
+  <div id="danhSachAnh">
     <p>Đang tải thư viện hoạt động...</p>
-  </div>
-</section>
-
-<section id="tuyenduong" class="box">
-  <h2>🌟 Góc tuyên dương học sinh</h2>
-  <p>Những học sinh tiêu biểu, tích cực và có nhiều cố gắng trong học tập, rèn luyện.</p>
-  <div id="danhSachTuyenDuong">
-    <p>Đang tải danh sách tuyên dương...</p>
-  </div>
-</section>
-
-<section id="xinnghi" class="box">
-  <h2>📝 Xin nghỉ học online</h2>
-  <p>Phụ huynh điền thông tin xin nghỉ học để giáo viên chủ nhiệm nắm bắt kịp thời.</p>
-  <div class="form-nghi">
-    <input id="xnHoTen" class="input-box" placeholder="Họ và tên học sinh">
-    <input id="xnMaHS" class="input-box" placeholder="Mã học sinh">
-    <input id="xnNgay" class="input-box" type="date">
-    <textarea id="xnLyDo" class="input-box" placeholder="Lý do xin nghỉ"></textarea>
-    <button onclick="guiXinNghiHoc()">Gửi xin nghỉ</button>
-    <p id="xnStatus"></p>
   </div>
 </section>
 
@@ -219,6 +209,8 @@ placeholder="🔒 Nhập mật khẩu">
   © 2026 - Cổng thông tin lớp cô Trà My - Trường Tiểu học Ngô Quyền
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
 <script src="script.js"></script>
 
 </body>

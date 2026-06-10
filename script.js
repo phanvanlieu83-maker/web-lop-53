@@ -377,7 +377,7 @@ function dangNhapHocSinh() {
   script.id = "jsonpScript";
   script.src =
   API_URL +
-  "?hoten=" + encodeURIComponent(hoten) +
+  "?hoten=" + encodeURIComponent(hoten) + // có thể nhập họ tên hoặc mã học sinh nếu Apps Script đã hỗ trợ MAHS
   "&matkhau=" + encodeURIComponent(matkhau) +
   "&namhoc=" + encodeURIComponent(namhoc) +
   "&callback=nhanKetQuaHocSinh";
@@ -596,131 +596,403 @@ function hienThiNamHoc() {
 
 hienThiNamHoc();
 
-// =====================================================
-// ADMIN 7.0 - HIỂN THỊ HOẠT ĐỘNG LỚP, TUYÊN DƯƠNG, XIN NGHỈ
-// =====================================================
-let __dsHoatDongLop = [];
 
-function chuyenYoutubeEmbed(url) {
-  if (!url) return "";
-  let u = String(url).trim();
-  if (u.includes("youtube.com/watch?v=")) {
-    const id = u.split("v=")[1].split("&")[0];
-    return "https://www.youtube.com/embed/" + id;
-  }
-  if (u.includes("youtu.be/")) {
-    const id = u.split("youtu.be/")[1].split("?")[0];
-    return "https://www.youtube.com/embed/" + id;
-  }
-  if (u.includes("youtube.com/embed/")) return u;
-  return u;
+// =====================================================
+// PHẦN SUPABASE DATABASE 3.0 - THÔNG BÁO, LỊCH HỌC, TÀI LIỆU, ẢNH, VIDEO
+// Đã ghép thêm, không xóa Cổng phụ huynh và trò chơi cũ.
+// =====================================================
+
+// ===============================
+// SCRIPT WEBSITE LỚP 5/3 - PHIÊN BẢN 3.0
+// Giữ phần trò chơi, phụ huynh cũ nếu đã có trong file trước.
+// Phần dưới chuyên đọc dữ liệu Supabase Database.
+// ===============================
+
+function layIconTaiLieu(tenFile) {
+  const lower = (tenFile || "").toLowerCase();
+  if (lower.includes(".pdf")) return "📕";
+  if (lower.includes(".doc")) return "📘";
+  if (lower.includes(".xls")) return "📗";
+  if (lower.includes(".ppt")) return "📙";
+  if (lower.includes(".jpg") || lower.includes(".jpeg") || lower.includes(".png")) return "🖼️";
+  return "📄";
 }
 
-function laAnh(url){ return /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url||""); }
-function laVideoMp4(url){ return /\.(mp4|webm|ogg)(\?|$)/i.test(url||""); }
-
-function renderHoatDongItem(item){
-  const loai = item.loai || "link";
-  const url = item.url || item.imageurl || item.videourl || item.fileurl || "";
-  let body = "";
-
-  if (loai === "anh" || laAnh(url)) {
-    const ds = String(url).split("|").filter(Boolean);
-    body = `<div class="media-grid">` + ds.map(u => `<a href="${u}" target="_blank"><img src="${u}" loading="lazy" alt="${item.tieude||'Ảnh hoạt động'}"></a>`).join("") + `</div>`;
-  } else if (loai === "video" || url.includes("youtube") || url.includes("youtu.be") || laVideoMp4(url)) {
-    if (laVideoMp4(url)) {
-      body = `<video controls preload="metadata" src="${url}"></video>`;
-    } else {
-      body = `<iframe src="${chuyenYoutubeEmbed(url)}" allowfullscreen></iframe>`;
-    }
-  } else {
-    body = `<a class="year-btn" href="${url}" target="_blank">🔗 Mở liên kết</a>`;
-  }
-
-  return `<div class="media-card">
-    <h3>${item.is_pinned ? '📌 ' : ''}${loai === 'video' ? '🎬' : loai === 'anh' ? '📸' : '🔗'} ${item.tieude || 'Hoạt động lớp'}</h3>
-    ${item.noidung ? `<p>${item.noidung}</p>` : ''}
-    ${body}
-    <div class="media-info">${item.namhoc || ''}${item.album ? ' · Album: ' + item.album : ''}</div>
-  </div>`;
+function dinhDangNgay(ngay) {
+  if (!ngay) return "";
+  const d = new Date(ngay);
+  if (isNaN(d.getTime())) return ngay;
+  return d.toLocaleDateString("vi-VN");
 }
 
-async function taiHoatDongLopV7(){
-  const khuVuc = document.getElementById("danhSachHoatDong") || document.getElementById("danhSachAnh");
+async function taiThongBaoV3() {
+  const khuVuc = document.getElementById("danhSachThongBao");
   if (!khuVuc || typeof supabaseClient === "undefined") return;
 
-  let { data, error } = await supabaseClient
-    .from("hoat_dong_lop")
+  const { data, error } = await supabaseClient
+    .from("thong_bao")
     .select("*")
-    .eq("is_deleted", false)
-    .order("is_pinned", { ascending:false })
-    .order("created_at", { ascending:false });
+    .order("created_at", { ascending: false })
+    .limit(10);
 
   if (error) {
-    // fallback dữ liệu cũ nếu chưa chuyển sang bảng mới
-    const [anh, video] = await Promise.all([
-      supabaseClient.from("thu_vien_anh").select("*").eq("is_deleted", false).order("created_at", {ascending:false}),
-      supabaseClient.from("video_lop").select("*").eq("is_deleted", false).order("created_at", {ascending:false})
-    ]);
-    data = [];
-    if (anh.data) data.push(...anh.data.map(x=>({ ...x, loai:"anh", url:x.imageurl })));
-    if (video.data) data.push(...video.data.map(x=>({ ...x, loai:"video", url:x.videourl })));
+    khuVuc.innerHTML = "<p>Chưa tải được thông báo.</p>";
+    return;
   }
 
-  __dsHoatDongLop = data || [];
-  locHoatDongLop();
+  if (!data || data.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có thông báo mới.</p>";
+    return;
+  }
+
+  let html = "";
+  data.forEach(tb => {
+    html += `
+      <div class="notice-card">
+        <div class="notice-date">📅 ${dinhDangNgay(tb.created_at)} | Năm học: ${tb.namhoc || ""}</div>
+        <h3>📢 ${tb.tieude || "Thông báo"}</h3>
+        ${tb.noidung ? `<p>${tb.noidung}</p>` : ""}
+        ${tb.fileurl ? `<a class="year-btn" href="${tb.fileurl}" target="_blank">Xem / Tải</a>` : ""}
+      </div>
+    `;
+  });
+  khuVuc.innerHTML = html;
 }
 
-function locHoatDongLop(){
-  const khuVuc = document.getElementById("danhSachHoatDong") || document.getElementById("danhSachAnh");
-  if (!khuVuc) return;
-  const tuKhoa = (document.getElementById("timHoatDong")?.value || "").toLowerCase();
-  const ds = (__dsHoatDongLop || []).filter(x => JSON.stringify(x).toLowerCase().includes(tuKhoa));
-  if (!ds.length) { khuVuc.innerHTML = "<p>Chưa có hoạt động nào.</p>"; return; }
-  khuVuc.innerHTML = ds.map(renderHoatDongItem).join("");
-}
-
-async function taiTuyenDuongV7(){
-  const khuVuc = document.getElementById("danhSachTuyenDuong");
+async function taiLichHocV3() {
+  const khuVuc = document.getElementById("danhSachLichHoc") || document.getElementById("lichhoc");
   if (!khuVuc || typeof supabaseClient === "undefined") return;
-  const {data,error} = await supabaseClient.from("tuyen_duong").select("*").eq("is_deleted", false).order("created_at", {ascending:false});
-  if (error || !data || !data.length){ khuVuc.innerHTML = "<p>Chưa có nội dung tuyên dương.</p>"; return; }
-  khuVuc.innerHTML = `<div class="praise-grid">` + data.map(item => `
-    <div class="praise-card">
-      ${item.imageurl ? `<img src="${item.imageurl}" loading="lazy">` : `<div class="praise-icon">🌟</div>`}
-      <h3>${item.tieude || 'Tuyên dương'}</h3>
-      <h4>${item.hoten || ''}</h4>
-      <p>${item.noidung || ''}</p>
-      <small>${item.namhoc || ''}</small>
-    </div>`).join("") + `</div>`;
-}
 
-async function guiXinNghiHoc(){
-  const status = document.getElementById("xnStatus");
-  const hoten = document.getElementById("xnHoTen")?.value.trim();
-  const mahs = document.getElementById("xnMaHS")?.value.trim();
-  const ngay = document.getElementById("xnNgay")?.value;
-  const lydo = document.getElementById("xnLyDo")?.value.trim();
-  if(!hoten || !ngay || !lydo){ status.innerHTML = "<b style='color:red'>Vui lòng nhập họ tên, ngày nghỉ và lý do.</b>"; return; }
-  const {error}=await supabaseClient.from("xin_nghi_hoc").insert([{hoten, mahs, ngay, lydo, trangthai:"Chờ duyệt"}]);
-  if(error){ status.innerHTML = "<b style='color:red'>Lỗi: "+error.message+"</b>"; return; }
-  status.innerHTML = "<b style='color:green'>✅ Đã gửi đơn xin nghỉ học.</b>";
-  document.getElementById("xnLyDo").value="";
-}
+  const { data, error } = await supabaseClient
+    .from("lich_hoc")
+    .select("*")
+    .order("ngay", { ascending: true });
 
-// Tự động điền tên/mã vào form xin nghỉ khi phụ huynh đăng nhập thành công
-const __hienKetQuaHocSinhCu = typeof hienKetQuaHocSinh === "function" ? hienKetQuaHocSinh : null;
-if (__hienKetQuaHocSinhCu) {
-  hienKetQuaHocSinh = function(data){
-    __hienKetQuaHocSinhCu(data);
-    setTimeout(()=>{
-      const h=document.getElementById("xnHoTen"); if(h) h.value=data.hoten||"";
-      const m=document.getElementById("xnMaHS"); if(m) m.value=data.mahs||data.MAHS||"";
-    },100);
+  if (error || !data || data.length === 0) {
+    const target = document.getElementById("danhSachLichHoc");
+    if (target) target.innerHTML = "<p>Chưa có lịch học hoặc lịch kiểm tra mới.</p>";
+    return;
   }
+
+  let html = `
+    <table class="result-table">
+      <tr><th>Ngày</th><th>Nội dung</th><th>Ghi chú</th></tr>
+  `;
+  data.forEach(item => {
+    html += `
+      <tr>
+        <td>${dinhDangNgay(item.ngay)}</td>
+        <td><b>${item.tieude || ""}</b></td>
+        <td>${item.noidung || ""}</td>
+      </tr>
+    `;
+  });
+  html += "</table>";
+
+  let target = document.getElementById("danhSachLichHoc");
+  if (target) target.innerHTML = html;
 }
 
-document.addEventListener("DOMContentLoaded", function(){
-  taiHoatDongLopV7();
-  taiTuyenDuongV7();
+async function taiTaiLieuV3() {
+  const khuVuc = document.getElementById("danhSachTaiLieu");
+  if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  const { data, error } = await supabaseClient
+    .from("tai_lieu")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có tài liệu nào.</p>";
+    return;
+  }
+
+  let html = '<div class="tai-lieu-list">';
+  data.forEach(file => {
+    html += `
+      <div class="tai-lieu-item">
+        <span>${layIconTaiLieu(file.fileurl)} ${file.tieude || "Tài liệu"}</span>
+        <a href="${file.fileurl}" target="_blank">Xem / Tải</a>
+      </div>
+    `;
+  });
+  html += "</div>";
+  khuVuc.innerHTML = html;
+}
+
+async function taiThuVienAnhV3() {
+  const khuVuc = document.getElementById("danhSachAnh") || document.getElementById("thuvienAnhNoiDung");
+  if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  const { data, error } = await supabaseClient
+    .from("thu_vien_anh")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có hình ảnh nào.</p>";
+    return;
+  }
+
+  let html = '<div class="gallery-grid">';
+  data.forEach(img => {
+    html += `
+      <div class="gallery-card">
+        <a href="${img.imageurl}" target="_blank">
+          <img src="${img.imageurl}" alt="${img.tieude || "Ảnh hoạt động"}">
+        </a>
+        <p><b>${img.tieude || "Ảnh hoạt động"}</b></p>
+        <small>${img.namhoc || ""}</small>
+      </div>
+    `;
+  });
+  html += "</div>";
+  khuVuc.innerHTML = html;
+}
+
+async function taiVideoV3() {
+  const khuVuc = document.getElementById("danhSachVideo");
+  if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  const { data, error } = await supabaseClient
+    .from("video_lop")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error || !data || data.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có video nào.</p>";
+    return;
+  }
+
+  let html = '<div class="video-list">';
+
+data.forEach(video => {
+  let url = video.videourl || "";
+  let embedUrl = url;
+
+  if (url.includes("youtube.com/watch?v=")) {
+    const id = url.split("v=")[1].split("&")[0];
+    embedUrl = "https://www.youtube.com/embed/" + id;
+  }
+
+  if (url.includes("youtu.be/")) {
+    const id = url.split("youtu.be/")[1].split("?")[0];
+    embedUrl = "https://www.youtube.com/embed/" + id;
+  }
+
+  html += `
+    <div class="video-card">
+      <h3>🎬 ${video.tieude || "Video hoạt động"}</h3>
+      <div class="video-box">
+        <iframe 
+          src="${embedUrl}" 
+          frameborder="0" 
+          allowfullscreen>
+        </iframe>
+      </div>
+      <p><a href="${url}" target="_blank">Mở video trong tab mới</a></p>
+    </div>
+  `;
+});
+
+html += "</div>";
+khuVuc.innerHTML = html;
+}
+
+async function taiNamHocV3() {
+  const khuVuc = document.getElementById("dsNamHoc");
+  if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  const macDinh = [
+    { lop: "5/3", namhoc: "2025-2026", mota: "Lớp 5/3 - Năm học 2025 - 2026", trangthai: "Năm học hiện tại" },
+    { lop: "3/1", namhoc: "2024-2025", mota: "Lớp 3/1 - Năm học 2024 - 2025", trangthai: "Đã lưu trữ" },
+    { lop: "5/2", namhoc: "2023-2024", mota: "Lớp 5/2 - Năm học 2023 - 2024", trangthai: "Đã lưu trữ" },
+    { lop: "5/2", namhoc: "2022-2023", mota: "Lớp 5/2 - Năm học 2022 - 2023", trangthai: "Đã lưu trữ" },
+    { lop: "5/1", namhoc: "2021-2022", mota: "Lớp 5/1 - Năm học 2021 - 2022", trangthai: "Đã lưu trữ" }
+  ];
+
+  let { data } = await supabaseClient.from("nam_hoc").select("*").order("created_at", { ascending: false });
+  if (!data || data.length === 0) data = macDinh;
+
+  let html = "";
+  data.forEach(item => {
+    html += `
+      <div class="year-card">
+        <h3>${item.mota || item.lop || "Năm học"}</h3>
+        <p><b>Lớp:</b> ${item.lop || ""}</p>
+        <p><b>Năm học:</b> ${item.namhoc || ""}</p>
+        <p><b>Trạng thái:</b> ${item.trangthai || "Đã lưu trữ"}</p>
+        <a class="year-btn" href="#thuvien">Xem hình ảnh</a>
+      </div>
+    `;
+  });
+  khuVuc.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  taiThongBaoV3();
+  taiLichHocV3();
+  taiTaiLieuV3();
+  taiThuVienAnhV3();
+   taiNamHocV3();
+});
+async function taiThuVienAnhV5() {
+  const khuVuc = document.getElementById("danhSachAnh");
+  if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  const { data, error } = await supabaseClient
+    .from("thu_vien_anh")
+    .select("*")
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    khuVuc.innerHTML = "<p>Chưa tải được thư viện ảnh.</p>";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có hình ảnh nào.</p>";
+    return;
+  }
+
+  let html = '<div class="gallery-grid">';
+
+  data.forEach(item => {
+    const linkAnh = item.imageurl || item.fileurl || "";
+
+    if (!linkAnh) return;
+
+    const danhSachLink = linkAnh.split("|");
+
+    danhSachLink.forEach(url => {
+      html += `
+        <div class="gallery-card">
+          <a href="${url}" target="_blank">
+            <img src="${url}" alt="${item.tieude || "Ảnh hoạt động"}">
+          </a>
+          <p><b>${item.tieude || "Ảnh hoạt động"}</b></p>
+          <small>${item.namhoc || ""} ${item.album ? " - " + item.album : ""}</small>
+        </div>
+      `;
+    });
+  });
+
+  html += "</div>";
+  khuVuc.innerHTML = html;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  taiThuVienAnhV5();
+});
+
+
+// =====================================================
+// ADMIN 6.0 - THƯ VIỆN HOẠT ĐỘNG LỚP GỘP ẢNH + VIDEO + LINK
+// Đọc bảng mới: hoat_dong_lop. Nếu bảng mới chưa có dữ liệu, tự đọc lại bảng cũ thu_vien_anh và video_lop.
+// =====================================================
+
+function youtubeEmbedV6(url) {
+  if (!url) return "";
+  let id = "";
+  if (url.includes("youtube.com/watch?v=")) id = url.split("v=")[1].split("&")[0];
+  if (url.includes("youtu.be/")) id = url.split("youtu.be/")[1].split("?")[0];
+  if (url.includes("youtube.com/embed/")) id = url.split("/embed/")[1].split("?")[0];
+  return id ? "https://www.youtube.com/embed/" + id : "";
+}
+
+function laAnhV6(url) {
+  return /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test((url || "").split("?")[0]);
+}
+
+function laVideoV6(url) {
+  return /\.(mp4|webm|ogg)$/i.test((url || "").split("?")[0]);
+}
+
+function renderHoatDongV6(item) {
+  const urls = String(item.url || item.imageurl || item.fileurl || item.videourl || "").split("|").filter(Boolean);
+  const loai = item.loai || (urls.some(u => youtubeEmbedV6(u) || laVideoV6(u)) ? "video" : (urls.some(laAnhV6) ? "anh" : "link"));
+  const icon = loai === "video" ? "🎬" : (loai === "link" ? "🔗" : "📸");
+  let media = "";
+
+  urls.forEach(url => {
+    const embed = youtubeEmbedV6(url);
+    if (embed) {
+      media += `<div class="activity-video"><iframe src="${embed}" frameborder="0" allowfullscreen></iframe></div>`;
+    } else if (laVideoV6(url)) {
+      media += `<video class="activity-mp4" controls src="${url}"></video>`;
+    } else if (laAnhV6(url)) {
+      media += `<a href="${url}" target="_blank"><img class="activity-img" src="${url}" alt="${item.tieude || 'Hoạt động lớp'}"></a>`;
+    } else if (url) {
+      media += `<p><a class="year-btn" href="${url}" target="_blank">🔗 Mở liên kết</a></p>`;
+    }
+  });
+
+  return `
+    <div class="activity-card" data-search="${((item.tieude||'')+' '+(item.album||'')+' '+(item.namhoc||'')).toLowerCase()}">
+      <div class="activity-head">
+        <h3>${icon} ${item.tieude || 'Hoạt động lớp'}</h3>
+        ${item.is_pinned ? '<span class="activity-pin">📌 Nổi bật</span>' : ''}
+      </div>
+      ${item.noidung ? `<p>${item.noidung}</p>` : ''}
+      ${media || '<p>Chưa có file hoặc liên kết.</p>'}
+      <div class="activity-meta">
+        ${item.namhoc ? `<span>📚 ${item.namhoc}</span>` : ''}
+        ${item.album ? `<span>📁 ${item.album}</span>` : ''}
+        ${item.created_at ? `<span>📅 ${dinhDangNgay(item.created_at)}</span>` : ''}
+      </div>
+    </div>`;
+}
+
+async function taiHoatDongLopV6() {
+  const khuVuc = document.getElementById("danhSachAnh");
+  if (!khuVuc || typeof supabaseClient === "undefined") return;
+
+  let data = [];
+  let error = null;
+
+  try {
+    const res = await supabaseClient
+      .from("hoat_dong_lop")
+      .select("*")
+      .eq("is_deleted", false)
+      .order("is_pinned", { ascending: false })
+      .order("created_at", { ascending: false });
+    data = res.data || [];
+    error = res.error;
+  } catch (e) {
+    error = e;
+  }
+
+  // Nếu bảng mới chưa có dữ liệu, lấy dữ liệu cũ để không mất nội dung đã đăng.
+  if ((!data || data.length === 0) && !error) {
+    const anh = await supabaseClient.from("thu_vien_anh").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
+    const video = await supabaseClient.from("video_lop").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
+    data = [];
+    if (anh.data) data.push(...anh.data.map(x => ({...x, loai:"anh", url:x.imageurl || x.fileurl})));
+    if (video.data) data.push(...video.data.map(x => ({...x, loai:"video", url:x.videourl})));
+  }
+
+  if (error && (!data || data.length === 0)) {
+    khuVuc.innerHTML = "<p>Chưa tải được thư viện hoạt động. Hãy kiểm tra bảng hoat_dong_lop trong Supabase.</p>";
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    khuVuc.innerHTML = "<p>Chưa có hoạt động nào.</p>";
+    return;
+  }
+
+  khuVuc.innerHTML = `<div class="activity-grid">${data.map(renderHoatDongV6).join("")}</div>`;
+}
+
+function locHoatDongV6() {
+  const q = (document.getElementById("timHoatDong")?.value || "").toLowerCase().trim();
+  document.querySelectorAll(".activity-card").forEach(card => {
+    card.style.display = card.dataset.search.includes(q) ? "block" : "none";
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+  taiHoatDongLopV6();
 });
