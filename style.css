@@ -647,6 +647,20 @@ footer {
   background:#e67e22;
 }
 
-/* ===== ADMIN/WEBSITE 5.1 - THƯ VIỆN HOẠT ĐỘNG LỚP ===== */
-.activity-album{margin:24px 0;padding:14px;border-radius:16px;background:#f8fafc;border:1px solid #dbeafe}
-.activity-album>h3{color:#065f46;margin:0 0 12px}.activity-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.activity-card{background:#ecfdf5;border-left:6px solid #059669;border-radius:16px;padding:16px;box-shadow:0 5px 18px rgba(0,0,0,.06)}.activity-card h3{margin-top:0;color:#065f46}.activity-meta{font-size:13px;color:#475569;margin:6px 0 12px}.activity-badge{display:inline-block;background:#fef3c7;color:#92400e;padding:4px 8px;border-radius:999px;font-size:12px;margin:2px}.activity-badge.pinned{background:#fee2e2;color:#991b1b}.activity-images{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px}.activity-images img{width:100%;height:140px;object-fit:cover;border-radius:12px;border:1px solid #d1fae5}.video-box iframe{width:100%;height:360px;border-radius:14px}.activity-video,.activity-thumb-video{width:100%;max-height:420px;border-radius:14px;background:#000}@media(max-width:640px){.video-box iframe{height:220px}.activity-images img{height:110px}}
+/* ================= ADMIN/WEBSITE 6.0 - HOẠT ĐỘNG LỚP + MÃ HS ================= */
+.activity-filter { margin: 14px 0 18px; }
+.activity-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+.activity-card { background: #f0fdf4; border-left: 6px solid #059669; border-radius: 16px; padding: 16px; box-shadow: 0 8px 20px rgba(0,0,0,.06); overflow: hidden; }
+.activity-card h3 { margin: 0 0 10px; color: #065f46; }
+.activity-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.activity-pin { background: #fef3c7; color: #92400e; padding: 5px 9px; border-radius: 999px; font-size: 13px; font-weight: 700; }
+.activity-img { width: 100%; max-height: 360px; object-fit: cover; border-radius: 14px; margin: 8px 0; }
+.activity-video iframe { width: 100%; height: 315px; border-radius: 14px; margin: 8px 0; }
+.activity-mp4 { width: 100%; max-height: 420px; border-radius: 14px; margin: 8px 0; }
+.activity-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; color: #065f46; font-size: 13px; }
+.activity-meta span { background: #dcfce7; padding: 5px 8px; border-radius: 999px; }
+.ma-hoc-sinh { color: #006b3c; font-weight: 600; }
+.admin-dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 18px 0; }
+.admin-stat-card { background: #ecfdf5; border-left: 6px solid #059669; border-radius: 14px; padding: 14px; }
+.admin-stat-card b { display: block; font-size: 24px; color: #065f46; }
+@media (max-width: 640px) { .activity-video iframe { height: 220px; } }
