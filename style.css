@@ -664,3 +664,84 @@ footer {
 .admin-stat-card { background: #ecfdf5; border-left: 6px solid #059669; border-radius: 14px; padding: 14px; }
 .admin-stat-card b { display: block; font-size: 24px; color: #065f46; }
 @media (max-width: 640px) { .activity-video iframe { height: 220px; } }
+
+/* =====================================================
+   ADMIN 6.0 FIX - ĐỒNG NHẤT KÍCH THƯỚC ẢNH / VIDEO / LINK
+   ===================================================== */
+.activity-grid{
+  display:block !important;
+  max-width:820px;
+  margin:0 auto;
+}
+
+.activity-card{
+  width:100%;
+  box-sizing:border-box;
+  margin:0 0 24px 0;
+  background:#f0fdf4;
+  border-left:6px solid #059669;
+  border-radius:18px;
+  padding:18px;
+  box-shadow:0 8px 22px rgba(0,0,0,.08);
+  overflow:hidden;
+}
+
+.activity-card img.activity-img,
+.activity-img{
+  display:block;
+  width:100% !important;
+  height:420px !important;
+  max-height:420px !important;
+  object-fit:cover;
+  border-radius:14px;
+  margin:10px 0;
+  background:#e5e7eb;
+}
+
+.activity-video{
+  position:relative;
+  width:100%;
+  aspect-ratio:16/9;
+  margin:10px 0;
+  border-radius:14px;
+  overflow:hidden;
+  background:#000;
+}
+
+.activity-video iframe{
+  position:absolute;
+  inset:0;
+  width:100% !important;
+  height:100% !important;
+  border:0;
+  border-radius:14px;
+  margin:0 !important;
+}
+
+.activity-mp4,
+.activity-card video{
+  display:block;
+  width:100% !important;
+  height:420px !important;
+  max-height:420px !important;
+  object-fit:cover;
+  border-radius:14px;
+  margin:10px 0;
+  background:#000;
+}
+
+.activity-card .year-btn{
+  display:inline-block;
+  margin-top:12px;
+}
+
+@media(max-width:768px){
+  .activity-grid{max-width:100%;}
+  .activity-card img.activity-img,
+  .activity-img,
+  .activity-mp4,
+  .activity-card video{
+    height:260px !important;
+    max-height:260px !important;
+  }
+}
