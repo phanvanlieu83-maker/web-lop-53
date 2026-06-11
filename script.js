@@ -1113,20 +1113,49 @@ function inKetQuaHocTap() {
       <title>Kết quả học tập</title>
       <link rel="stylesheet" href="style.css">
       <style>
-        body {
-          font-family: Arial, sans-serif;
-          background: white;
-          padding: 20px;
-        }
+       body {
+  font-family: Arial, sans-serif;
+  background: white;
+  padding: 8px;
+  font-size: 12px;
+}
 
-        .print-btn {
-          display: none !important;
-        }
+.print-btn {
+  display: none !important;
+}
 
-        @page {
-          size: A4;
-          margin: 15mm;
-        }
+.student-header {
+  padding: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+.student-header h2 {
+  font-size: 20px !important;
+}
+
+.student-name {
+  font-size: 22px !important;
+}
+
+.term-card-full {
+  page-break-inside: avoid;
+  padding: 10px !important;
+  margin-bottom: 10px !important;
+}
+
+.result-table {
+  font-size: 11px !important;
+}
+
+.result-table th,
+.result-table td {
+  padding: 5px !important;
+}
+
+@page {
+  size: A4 landscape;
+  margin: 8mm;
+}
       </style>
     </head>
     <body>
