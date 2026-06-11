@@ -441,6 +441,9 @@ console.log(data);
         <div class="student-desc ma-hoc-sinh">
             Mã học sinh: <b>${data.mahs || data.MAHS || "Chưa cập nhật"}</b>
         </div>
+        <button class="print-btn" onclick="window.print()">
+  📄 In / Lưu PDF kết quả học tập
+</button>
 
         <div class="student-desc">
             Trường Tiểu học Ngô Quyền
