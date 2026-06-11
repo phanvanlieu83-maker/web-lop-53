@@ -441,7 +441,7 @@ console.log(data);
         <div class="student-desc ma-hoc-sinh">
             Mã học sinh: <b>${data.mahs || data.MAHS || "Chưa cập nhật"}</b>
         </div>
-        <button class="print-btn" onclick="window.print()">
+       <button class="print-btn" onclick="inKetQuaHocTap()">
   📄 In / Lưu PDF kết quả học tập
 </button>
 
@@ -1095,3 +1095,49 @@ document.addEventListener("keydown", function(e){
 document.addEventListener("DOMContentLoaded", function () {
   taiHoatDongLopV63();
 });
+function inKetQuaHocTap() {
+  const noiDung = document.getElementById("ketQuaHocSinh");
+
+  if (!noiDung || noiDung.innerHTML.trim() === "") {
+    alert("Chưa có kết quả học tập để in.");
+    return;
+  }
+
+  const cuaSoIn = window.open("", "_blank");
+
+  cuaSoIn.document.write(`
+    <!DOCTYPE html>
+    <html lang="vi">
+    <head>
+      <meta charset="UTF-8">
+      <title>Kết quả học tập</title>
+      <link rel="stylesheet" href="style.css">
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          background: white;
+          padding: 20px;
+        }
+
+        .print-btn {
+          display: none !important;
+        }
+
+        @page {
+          size: A4;
+          margin: 15mm;
+        }
+      </style>
+    </head>
+    <body>
+      ${noiDung.innerHTML}
+    </body>
+    </html>
+  `);
+
+  cuaSoIn.document.close();
+
+  cuaSoIn.onload = function () {
+    cuaSoIn.print();
+  };
+}
