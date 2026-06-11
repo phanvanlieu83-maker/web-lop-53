@@ -854,3 +854,32 @@ footer {
   #lightboxV63 .lb-video{ width:92vw; height:52vw; }
   .lb-prev,.lb-next{ width:42px; height:42px; font-size:34px; }
 }
+.print-btn {
+  margin-top: 10px;
+  background: #f59e0b;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+@media print {
+  header, nav, footer, #phuhuynh > h2, #phuhuynh > p, .form-group, #phuhuynh button:not(.print-btn) {
+    display: none !important;
+  }
+
+  .print-btn {
+    display: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .box, .parent-page {
+    box-shadow: none !important;
+    border: none !important;
+  }
+}
