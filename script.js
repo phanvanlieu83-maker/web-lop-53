@@ -887,12 +887,20 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 
 
+
 // =====================================================
-// ADMIN 6.0 - THƯ VIỆN HOẠT ĐỘNG LỚP GỘP ẢNH + VIDEO + LINK
-// Đọc bảng mới: hoat_dong_lop. Nếu bảng mới chưa có dữ liệu, tự đọc lại bảng cũ thu_vien_anh và video_lop.
+// ADMIN 6.3 - GALLERY ỔN ĐỊNH
+// Bỏ Góc tuyên dương + Xin nghỉ học.
+// Thư viện hoạt động đọc trực tiếp từ 2 bảng ổn định:
+//   1) thu_vien_anh: ảnh hoạt động
+//   2) video_lop: video YouTube / video online / link
+// Không dùng bảng hoat_dong_lop nên không bị mất dữ liệu cũ.
 // =====================================================
 
-function youtubeEmbedV6(url) {
+let danhSachMediaV63 = [];
+let viTriLightboxV63 = 0;
+
+function youtubeEmbedV63(url) {
   if (!url) return "";
   let id = "";
   if (url.includes("youtube.com/watch?v=")) id = url.split("v=")[1].split("&")[0];
@@ -901,98 +909,186 @@ function youtubeEmbedV6(url) {
   return id ? "https://www.youtube.com/embed/" + id : "";
 }
 
-function laAnhV6(url) {
+function youtubeThumbV63(url) {
+  if (!url) return "";
+  let id = "";
+  if (url.includes("youtube.com/watch?v=")) id = url.split("v=")[1].split("&")[0];
+  if (url.includes("youtu.be/")) id = url.split("youtu.be/")[1].split("?")[0];
+  if (url.includes("youtube.com/embed/")) id = url.split("/embed/")[1].split("?")[0];
+  return id ? "https://img.youtube.com/vi/" + id + "/hqdefault.jpg" : "";
+}
+
+function laAnhV63(url) {
   return /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test((url || "").split("?")[0]);
 }
 
-function laVideoV6(url) {
+function laVideoFileV63(url) {
   return /\.(mp4|webm|ogg)$/i.test((url || "").split("?")[0]);
 }
 
-function renderHoatDongV6(item) {
-  const urls = String(item.url || item.imageurl || item.fileurl || item.videourl || "").split("|").filter(Boolean);
-  const loai = item.loai || (urls.some(u => youtubeEmbedV6(u) || laVideoV6(u)) ? "video" : (urls.some(laAnhV6) ? "anh" : "link"));
-  const icon = loai === "video" ? "🎬" : (loai === "link" ? "🔗" : "📸");
-  let media = "";
+function tachUrlsV63(text) {
+  return String(text || "").split("|").map(x => x.trim()).filter(Boolean);
+}
 
+function themMediaV63(arr, item) {
+  const urls = tachUrlsV63(item.url || item.imageurl || item.fileurl || item.videourl || "");
   urls.forEach(url => {
-    const embed = youtubeEmbedV6(url);
-    if (embed) {
-      media += `<div class="activity-video"><iframe src="${embed}" frameborder="0" allowfullscreen></iframe></div>`;
-    } else if (laVideoV6(url)) {
-      media += `<video class="activity-mp4" controls src="${url}"></video>`;
-    } else if (laAnhV6(url)) {
-      media += `<a href="${url}" target="_blank"><img class="activity-img" src="${url}" alt="${item.tieude || 'Hoạt động lớp'}"></a>`;
-    } else if (url) {
-      media += `<p><a class="year-btn" href="${url}" target="_blank">🔗 Mở liên kết</a></p>`;
-    }
+    let loai = item.loai || "link";
+    if (youtubeEmbedV63(url) || laVideoFileV63(url)) loai = "video";
+    else if (laAnhV63(url)) loai = "anh";
+    arr.push({
+      tieude: item.tieude || "Hoạt động lớp",
+      noidung: item.noidung || "",
+      album: item.album || "",
+      namhoc: item.namhoc || "",
+      created_at: item.created_at || "",
+      is_pinned: !!item.is_pinned,
+      loai,
+      url
+    });
   });
+}
+
+function renderMediaCardV63(item, index) {
+  const q = ((item.tieude || "") + " " + (item.album || "") + " " + (item.namhoc || "") + " " + (item.noidung || "")).toLowerCase();
+  const embed = youtubeEmbedV63(item.url);
+  const thumb = youtubeThumbV63(item.url);
+  let media = "";
+  let icon = item.loai === "video" ? "🎬" : (item.loai === "link" ? "🔗" : "📸");
+
+  if (embed) {
+    media = `
+      <div class="gallery-thumb video-thumb" onclick="moVideoV63('${embed.replace(/'/g, "&#39;")}')">
+        <img src="${thumb}" alt="${item.tieude || 'Video'}">
+        <div class="play-icon">▶</div>
+      </div>`;
+  } else if (laVideoFileV63(item.url)) {
+    media = `<video class="gallery-video" controls preload="metadata" src="${item.url}"></video>`;
+  } else if (laAnhV63(item.url)) {
+    media = `<div class="gallery-thumb" onclick="moLightboxV63(${index})"><img src="${item.url}" loading="lazy" alt="${item.tieude || 'Ảnh hoạt động'}"></div>`;
+  } else {
+    media = `<div class="gallery-link"><a href="${item.url}" target="_blank">🔗 Mở liên kết</a></div>`;
+  }
 
   return `
-    <div class="activity-card" data-search="${((item.tieude||'')+' '+(item.album||'')+' '+(item.namhoc||'')).toLowerCase()}">
-      <div class="activity-head">
-        <h3>${icon} ${item.tieude || 'Hoạt động lớp'}</h3>
-        ${item.is_pinned ? '<span class="activity-pin">📌 Nổi bật</span>' : ''}
-      </div>
-      ${item.noidung ? `<p>${item.noidung}</p>` : ''}
-      ${media || '<p>Chưa có file hoặc liên kết.</p>'}
-      <div class="activity-meta">
-        ${item.namhoc ? `<span>📚 ${item.namhoc}</span>` : ''}
-        ${item.album ? `<span>📁 ${item.album}</span>` : ''}
-        ${item.created_at ? `<span>📅 ${dinhDangNgay(item.created_at)}</span>` : ''}
+    <div class="gallery63-card" data-search="${q.replace(/"/g, '&quot;')}">
+      ${media}
+      <div class="gallery63-body">
+        <h3>${icon} ${item.tieude || "Hoạt động lớp"}</h3>
+        ${item.noidung ? `<p>${item.noidung}</p>` : ""}
+        <div class="gallery63-meta">
+          ${item.is_pinned ? `<span>📌 Nổi bật</span>` : ""}
+          ${item.namhoc ? `<span>📚 ${item.namhoc}</span>` : ""}
+          ${item.album ? `<span>📁 ${item.album}</span>` : ""}
+          ${item.created_at ? `<span>📅 ${dinhDangNgay(item.created_at)}</span>` : ""}
+        </div>
       </div>
     </div>`;
 }
 
-async function taiHoatDongLopV6() {
+async function taiHoatDongLopV63() {
   const khuVuc = document.getElementById("danhSachAnh");
   if (!khuVuc || typeof supabaseClient === "undefined") return;
 
-  let data = [];
-  let error = null;
+  khuVuc.innerHTML = "<p>Đang tải thư viện hoạt động...</p>";
 
-  try {
-    const res = await supabaseClient
-      .from("hoat_dong_lop")
-      .select("*")
-      .eq("is_deleted", false)
-      .order("is_pinned", { ascending: false })
-      .order("created_at", { ascending: false });
-    data = res.data || [];
-    error = res.error;
-  } catch (e) {
-    error = e;
+  let all = [];
+
+  const anhRes = await supabaseClient
+    .from("thu_vien_anh")
+    .select("*")
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  const videoRes = await supabaseClient
+    .from("video_lop")
+    .select("*")
+    .eq("is_deleted", false)
+    .order("created_at", { ascending: false });
+
+  if (anhRes.data) {
+    anhRes.data.forEach(item => themMediaV63(all, { ...item, loai: "anh", url: item.imageurl || item.fileurl }));
+  }
+  if (videoRes.data) {
+    videoRes.data.forEach(item => themMediaV63(all, { ...item, loai: "video", url: item.videourl }));
   }
 
-  // Nếu bảng mới chưa có dữ liệu, lấy dữ liệu cũ để không mất nội dung đã đăng.
-  if ((!data || data.length === 0) && !error) {
-    const anh = await supabaseClient.from("thu_vien_anh").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
-    const video = await supabaseClient.from("video_lop").select("*").eq("is_deleted", false).order("created_at", { ascending: false });
-    data = [];
-    if (anh.data) data.push(...anh.data.map(x => ({...x, loai:"anh", url:x.imageurl || x.fileurl})));
-    if (video.data) data.push(...video.data.map(x => ({...x, loai:"video", url:x.videourl})));
-  }
+  all.sort((a, b) => {
+    if (a.is_pinned !== b.is_pinned) return a.is_pinned ? -1 : 1;
+    return new Date(b.created_at || 0) - new Date(a.created_at || 0);
+  });
 
-  if (error && (!data || data.length === 0)) {
-    khuVuc.innerHTML = "<p>Chưa tải được thư viện hoạt động. Hãy kiểm tra bảng hoat_dong_lop trong Supabase.</p>";
+  danhSachMediaV63 = all;
+
+  if (!all.length) {
+    khuVuc.innerHTML = "<p>Chưa có hình ảnh hoặc video hoạt động nào.</p>";
     return;
   }
 
-  if (!data || data.length === 0) {
-    khuVuc.innerHTML = "<p>Chưa có hoạt động nào.</p>";
-    return;
-  }
-
-  khuVuc.innerHTML = `<div class="activity-grid">${data.map(renderHoatDongV6).join("")}</div>`;
+  khuVuc.innerHTML = `<div class="gallery63-grid">${all.map(renderMediaCardV63).join("")}</div>`;
 }
 
-function locHoatDongV6() {
+function locHoatDongV63() {
   const q = (document.getElementById("timHoatDong")?.value || "").toLowerCase().trim();
-  document.querySelectorAll(".activity-card").forEach(card => {
+  document.querySelectorAll(".gallery63-card").forEach(card => {
     card.style.display = card.dataset.search.includes(q) ? "block" : "none";
   });
 }
 
+function taoLightboxKhungV63() {
+  if (document.getElementById("lightboxV63")) return;
+  const div = document.createElement("div");
+  div.id = "lightboxV63";
+  div.innerHTML = `
+    <button class="lb-close" onclick="dongLightboxV63()">×</button>
+    <button class="lb-prev" onclick="chuyenLightboxV63(-1)">‹</button>
+    <div class="lb-content" id="lbContentV63"></div>
+    <button class="lb-next" onclick="chuyenLightboxV63(1)">›</button>
+  `;
+  document.body.appendChild(div);
+}
+
+function moLightboxV63(index) {
+  taoLightboxKhungV63();
+  viTriLightboxV63 = index;
+  const item = danhSachMediaV63[index];
+  if (!item) return;
+  document.getElementById("lbContentV63").innerHTML = `
+    <img src="${item.url}" alt="${item.tieude || 'Ảnh hoạt động'}">
+    <div class="lb-caption"><b>${item.tieude || "Hoạt động lớp"}</b><br>${item.album || ""} ${item.namhoc || ""}</div>
+  `;
+  document.getElementById("lightboxV63").classList.add("show");
+}
+
+function moVideoV63(embedUrl) {
+  taoLightboxKhungV63();
+  document.getElementById("lbContentV63").innerHTML = `<iframe class="lb-video" src="${embedUrl}" frameborder="0" allowfullscreen></iframe>`;
+  document.getElementById("lightboxV63").classList.add("show");
+}
+
+function dongLightboxV63() {
+  const lb = document.getElementById("lightboxV63");
+  if (lb) {
+    lb.classList.remove("show");
+    document.getElementById("lbContentV63").innerHTML = "";
+  }
+}
+
+function chuyenLightboxV63(step) {
+  const anhIndexes = danhSachMediaV63.map((x,i)=>laAnhV63(x.url)?i:null).filter(x=>x!==null);
+  if (!anhIndexes.length) return;
+  let pos = anhIndexes.indexOf(viTriLightboxV63);
+  if (pos < 0) pos = 0;
+  pos = (pos + step + anhIndexes.length) % anhIndexes.length;
+  moLightboxV63(anhIndexes[pos]);
+}
+
+document.addEventListener("keydown", function(e){
+  if(e.key === "Escape") dongLightboxV63();
+  if(e.key === "ArrowLeft") chuyenLightboxV63(-1);
+  if(e.key === "ArrowRight") chuyenLightboxV63(1);
+});
+
 document.addEventListener("DOMContentLoaded", function () {
-  taiHoatDongLopV6();
+  taiHoatDongLopV63();
 });

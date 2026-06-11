@@ -745,3 +745,112 @@ footer {
     max-height:260px !important;
   }
 }
+
+
+/* =====================================================
+   ADMIN 6.3 - GALLERY CHUYÊN NGHIỆP, ỔN ĐỊNH
+   Dùng cho Thư viện hoạt động lớp: ảnh + video YouTube + link.
+   ===================================================== */
+.gallery63-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+  gap:18px;
+  margin-top:18px;
+}
+.gallery63-card{
+  background:#ffffff;
+  border:1px solid #d1fae5;
+  border-radius:18px;
+  overflow:hidden;
+  box-shadow:0 8px 22px rgba(0,0,0,.08);
+}
+.gallery-thumb{
+  width:100%;
+  height:230px;
+  background:#e5e7eb;
+  overflow:hidden;
+  position:relative;
+  cursor:pointer;
+}
+.gallery-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  transition:transform .25s ease;
+}
+.gallery-thumb:hover img{ transform:scale(1.04); }
+.video-thumb{ background:#000; }
+.play-icon{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:52px;
+  color:white;
+  text-shadow:0 3px 12px rgba(0,0,0,.7);
+  background:rgba(0,0,0,.18);
+}
+.gallery-video{
+  width:100%;
+  height:230px;
+  object-fit:cover;
+  background:#000;
+  display:block;
+}
+.gallery-link{
+  height:230px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(135deg,#ecfdf5,#d1fae5);
+}
+.gallery-link a{
+  background:#059669;
+  color:#fff;
+  text-decoration:none;
+  padding:12px 18px;
+  border-radius:12px;
+  font-weight:700;
+}
+.gallery63-body{ padding:14px; }
+.gallery63-body h3{ margin:0 0 8px; color:#065f46; font-size:18px; }
+.gallery63-body p{ margin:6px 0; }
+.gallery63-meta{ display:flex; flex-wrap:wrap; gap:6px; margin-top:10px; }
+.gallery63-meta span{ background:#dcfce7; color:#065f46; padding:5px 8px; border-radius:999px; font-size:12px; font-weight:600; }
+#lightboxV63{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.86);
+  z-index:9999;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+#lightboxV63.show{ display:flex; }
+#lightboxV63 .lb-content{ max-width:92vw; max-height:88vh; text-align:center; color:#fff; }
+#lightboxV63 .lb-content img{ max-width:92vw; max-height:78vh; border-radius:16px; box-shadow:0 10px 30px rgba(0,0,0,.45); }
+#lightboxV63 .lb-video{ width:85vw; max-width:980px; height:55vw; max-height:560px; border-radius:16px; background:#000; }
+.lb-caption{ margin-top:10px; font-size:16px; }
+.lb-close,.lb-prev,.lb-next{
+  position:absolute;
+  border:0;
+  background:rgba(255,255,255,.18);
+  color:white;
+  cursor:pointer;
+  border-radius:999px;
+  font-weight:700;
+}
+.lb-close{ top:18px; right:22px; width:44px; height:44px; font-size:32px; line-height:40px; }
+.lb-prev,.lb-next{ top:50%; transform:translateY(-50%); width:54px; height:54px; font-size:44px; line-height:44px; }
+.lb-prev{ left:22px; }
+.lb-next{ right:22px; }
+.lb-close:hover,.lb-prev:hover,.lb-next:hover{ background:rgba(255,255,255,.32); }
+@media(max-width:768px){
+  .gallery63-grid{ grid-template-columns:1fr; }
+  .gallery-thumb,.gallery-video,.gallery-link{ height:220px; }
+  #lightboxV63 .lb-video{ width:92vw; height:52vw; }
+  .lb-prev,.lb-next{ width:42px; height:42px; font-size:34px; }
+}

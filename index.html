@@ -185,28 +185,15 @@ placeholder="🔒 Nhập mật khẩu">
 </section>
 <section id="thuvien" class="box">
   <h2>🎉 Thư viện hoạt động lớp</h2>
-  <p>Nơi lưu giữ hình ảnh, video, liên kết hoạt động, phong trào và kỷ niệm của lớp trong năm học.</p>
+  <p>Nơi lưu giữ hình ảnh, video, đường link hoạt động, phong trào và kỷ niệm của lớp theo từng năm học.</p>
 
-  <input
-    type="text"
-    id="timKiemThuVien"
-    placeholder="🔎 Tìm hoạt động, album, năm học..."
-    class="search-input"
-  >
+  <div class="activity-filter">
+    <input id="timHoatDong" class="input-box" placeholder="🔎 Tìm hoạt động, album, năm học..." oninput="locHoatDongV63()">
+  </div>
 
   <div id="danhSachAnh">
     <p>Đang tải thư viện hoạt động...</p>
   </div>
-</section>
-
-<section id="lienhe" class="box">
-  <h2>Liên hệ giáo viên chủ nhiệm</h2>
-
-  <p><b>Giáo viên chủ nhiệm:</b> Nguyễn Thị Trà My</p>
-
-  <p><b>Trường:</b> Tiểu học Ngô Quyền</p>
-
-  <p><b>Nội dung liên hệ:</b> Trao đổi tình hình học tập, rèn luyện và các hoạt động của học sinh.</p>
 </section>
 
 <section id="lienhe" class="box">
